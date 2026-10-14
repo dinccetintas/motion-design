@@ -128,7 +128,7 @@ for (const f of reel) {
   const pass = Object.values(f.qa.scores).every((v) => v >= 8);
   fig.innerHTML = `<div class="win"><canvas></canvas></div>
     <div class="meta"><h3 class="cond">${f.title}</h3><a class="tab small ghost" href="/studio?showcase=${encodeURIComponent(f.id)}">Remix</a></div>
-    <p class="from">Made from ${f.from}<span class="fmt mono">· ${f.spec.format}</span></p>
+    <p class="from">Made from ${f.from}&nbsp;<span class="fmt mono">·&nbsp;${f.spec.format}</span></p>
     <p class="verdict">${pass ? '<span class="cross" aria-hidden="true"></span><span class="ok">Approved</span>' : '<span class="ok">In review</span>'}<span class="mono">${f.qa.overall.toFixed(1)}</span><span class="dim">${pass ? 'every axis 8 or above' : ''}</span></p>`;
   grid.appendChild(fig);
   const p = new Player(fig.querySelector('canvas'), { audio: false, loop: true, scale: f.spec.format === '16:9' ? 0.5 : 0.4 });

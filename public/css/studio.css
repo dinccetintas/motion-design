@@ -28,7 +28,7 @@ body { overflow: hidden; }
 .render-line i { display: block; height: 100%; width: 100%; background: var(--orange); transform-origin: 0 50%; transform: scaleX(var(--p, 0)); transition: transform 300ms var(--ease-out); }
 
 /* ---- Crew log ------------------------------------------------------------------- */
-.crew { grid-area: crew; display: grid; grid-template-rows: auto minmax(0, 1fr) auto; border-right: 1px solid var(--spool); background: var(--ink); min-height: 0; }
+.crew { grid-area: crew; display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr) auto; min-width: 0; border-right: 1px solid var(--spool); background: var(--ink); min-height: 0; }
 .crew-head { display: flex; justify-content: space-between; align-items: center; padding: 14px 18px 10px; }
 .crew-head h2 { margin: 0; }
 .crew-head .mono { font-size: 11px; }
@@ -59,10 +59,15 @@ body { overflow: hidden; }
 .entry img.sheet { margin-top: 8px; border-radius: 2px; width: 100%; outline: 1px solid var(--spool); cursor: zoom-in; }
 .studio-msg { padding: 10px 0 12px; font-size: 15px; color: var(--white); border-bottom: 1px dashed var(--spool); }
 
-.crew .composer { padding: 12px 18px 16px; border-top: 1px solid var(--spool); display: grid; gap: 10px; background: var(--ink); }
+.crew .composer { padding: 12px 18px 16px; border-top: 1px solid var(--spool); display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; background: var(--ink); }
+.composer-row { min-width: 0; }
 .composer .field { font-size: 15px; min-height: 76px; }
-.composer-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-.chips { display: flex; gap: 6px; flex-wrap: wrap; min-width: 0; }
+.composer-row { display: flex; align-items: flex-end; justify-content: space-between; gap: 10px; }
+/* Revision chips: one quiet row that scrolls sideways, so CUT stays the loudest thing here. */
+.composer-row > .tab { flex: none; }
+.chips { flex: 1 1 0; display: flex; gap: 6px; flex-wrap: nowrap; min-width: 0; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; }
+.chips::-webkit-scrollbar { display: none; }
+.chips .chip { flex: none; background: var(--dim); }
 .chip { border: 0; background: var(--white-2); color: var(--ink); clip-path: var(--torn); padding: 6px 12px; cursor: pointer; font-family: var(--f-cond); font-weight: 800; font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase; transition: background-color 160ms ease, transform 160ms var(--ease-out); }
 .chip:active { transform: scale(0.97); }
 @media (hover: hover) and (pointer: fine) { .chip:hover { background: var(--orange); } }
@@ -114,7 +119,7 @@ body { overflow: hidden; }
 /* ---- Rail ---------------------------------------------------------------------- */
 .rail { grid-area: rail; border-top: 1px solid var(--spool); background: var(--ink); min-width: 0; padding: 12px 0 10px; }
 .rail-scroll { height: 100%; overflow-x: auto; overflow-y: hidden; padding: 0 20px; cursor: ew-resize; touch-action: pan-y; }
-.rail-inner { position: relative; height: 100%; min-width: 100%; margin-right: 20px; border-radius: 4px; display: grid; grid-template-rows: auto 22px minmax(0, 1fr) auto; user-select: none; box-sizing: content-box; padding: 0 18px; }
+.rail-inner { position: relative; height: 100%; min-width: calc(100% - 36px); border-radius: 4px; display: grid; grid-template-rows: auto 22px minmax(0, 1fr) auto; user-select: none; box-sizing: content-box; padding: 0 18px; }
 .rail-inner .perf-row { margin: 6px 0; }
 .rail-ruler { position: relative; color: rgba(10,10,10,.78); }
 .rail-ruler i { position: absolute; bottom: 0; width: 1.5px; height: 7px; background: currentColor; }

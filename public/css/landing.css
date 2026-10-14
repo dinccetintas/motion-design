@@ -59,7 +59,7 @@
 .bin { list-style: none; margin: 0; padding: 22px 6px 4px; display: flex; gap: 10px; position: relative; overflow: hidden; }
 .bin::before { content: ''; position: absolute; left: 0; right: 0; top: 9px; height: 2px; background: var(--spool); }
 .bin li { position: relative; display: grid; justify-items: center; gap: 4px; padding-top: 14px; transform-origin: 50% -6px; transition: opacity 300ms ease, transform 400ms var(--ease-out); }
-.bin li .tape { position: absolute; top: -16px; left: 50%; width: 26px; height: 22px; margin-left: -13px; background: rgba(230, 225, 214, 0.82); clip-path: var(--torn); transform: rotate(-3deg); z-index: 1; }
+.bin li .tape { position: absolute; top: -4px; left: 50%; width: 26px; height: 22px; margin-left: -13px; background: rgba(230, 225, 214, 0.82); clip-path: var(--torn); transform: rotate(-3deg); z-index: 1; }
 .bin li:nth-child(even) .tape { transform: rotate(2.5deg); }
 .bin li .trimcell { display: block; border: 3px solid var(--white); border-radius: 2px; overflow: hidden; height: 64px; background: var(--ink); }
 .bin li .trimcell canvas { height: 100%; width: auto; }
@@ -91,7 +91,8 @@ section { padding: 112px 40px 96px; max-width: 1680px; margin: 0 auto; }
 .reel-item h3 { margin: 0; font-size: 24px; min-height: calc(2 * 0.92em); }
 .reel-item .from { margin: 0; color: var(--dim); font-size: 15px; max-width: 46ch; }
 .reel-item .meta { display: flex; justify-content: space-between; align-items: start; gap: 12px; }
-.reel-item .fmt { color: var(--white-2); margin-left: 6px; }
+.reel-item .fmt { color: var(--white-2); white-space: nowrap; }
+.reel-item .from { min-height: calc(2 * 1.55em); }   /* two lines, so verdict rows line up across cards */
 .reel-item .verdict { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--white-2); margin: 0; }
 .reel-item .verdict .ok { font-family: var(--f-cond); font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; font-size: 13px; }
 
@@ -177,6 +178,8 @@ section { padding: 112px 40px 96px; max-width: 1680px; margin: 0 auto; }
   .mrow.head .short { display: inline; }
   .measure-sheet { padding: 4px 12px 16px; }
   .strip { height: 420px; }
+  .rail-meta { flex-wrap: wrap; row-gap: 8px; }
+  .rail-meta .label { flex: 1 0 100%; }
   .bin li .trimcell { height: 48px; }
   .mrow .film { font-size: 16px; }
   .mrow .n { font-size: 14px; }

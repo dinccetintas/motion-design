@@ -76,8 +76,8 @@ export class Rail extends EventTarget {
   layout() {
     if (!this.tl.length) return;
     const beats = this.tl.reduce((a, s) => a + s.beats, 0);
-    const avail = this.scroll.clientWidth - 96;   // scroll padding, inner padding, end margin
-    this.pitch = Math.max(14, avail / beats);
+    const avail = this.scroll.clientWidth - 76;   // scroll padding and inner padding
+    this.pitch = Math.max(11, avail / beats);   // fit the whole film when it can; labels shrink to suit
     const width = beats * this.pitch;
     this.inner.style.width = width + 'px';
     this.frames.forEach((f, i) => { f.style.width = this.tl[i].beats * this.pitch + 'px'; });
