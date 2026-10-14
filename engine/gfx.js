@@ -14,7 +14,13 @@ export function parseRich(str) {
   let accent = false;
   for (const raw of String(str ?? '').split(/(\*)/)) {
     if (raw === '*') { accent = !accent; continue; }
-    for (const w of raw.split(/\s+/)) if (w) words.push({ text: w, accent });
+    const parts = raw.split(/(\s+)/);
+    parts.forEach((w, i) => {
+      if (!w || /^\s+$/.test(w)) return;
+      // Punctuation right after a closing accent ("*light*.") belongs to that word.
+      if (i === 0 && words.length && !/^\s/.test(raw) && /^[.,;:!?…)”’"']+$/.test(w)) { words[words.length - 1].text += w; return; }
+      words.push({ text: w, accent });
+    });
   }
   return words;
 }
@@ -68,11 +74,21 @@ export class Gfx {
 
   // ---- layout ---------------------------------------------------------------
   /** Greedy wrap of word runs into lines no wider than maxW (with current font). */
+  /** Width of a word run; italic accents are measured in the italic cut they are drawn in. */
+  wordW(wd) {
+    if (!wd.accent || !this._italicAccents) return this.measure(wd.text);
+    const font = this.ctx.font, fk = this._fkey;
+    this.ctx.font = 'italic ' + font.replace(/^italic\s+/, '');
+    this._fkey = fk + '|i';
+    const w = this.measure(wd.text) * 1.04;
+    this.ctx.font = font; this._fkey = fk;
+    return w;
+  }
   wrapWords(words, maxW) {
     const sp = this.measure(' ');
     const lines = []; let cur = [], w = 0;
     for (const wd of words) {
-      const ww = this.measure(wd.text);
+      const ww = this.wordW(wd);
       if (cur.length && w + sp + ww > maxW) { lines.push(cur); cur = []; w = 0; }
       cur.push(wd); w += (cur.length > 1 ? sp : 0) + ww;
     }
@@ -98,10 +114,11 @@ export class Gfx {
     const lh = o.lineHeight ?? (role === 'display' ? this.fontFor(role).lineHeight ?? 0.92 : 1.25);
     const maxLines = o.maxLines ?? 4;
     const maxSize = o.maxSize ?? box.h, minSize = o.minSize ?? this.u * 3.6;
+    this._italicAccents = role === 'display' && this.style.accentStyle === 'italic' && o.accentStyle !== 'none';
     const tryAt = (size) => {
       this.font(size, role, o);
       // A single word wider than the box can never fit at this size.
-      for (const w of words) if (this.measure(w.text) > box.w) return null;
+      for (const w of words) if (this.wordW(w) > box.w) return null;
       const lines = o.balance === false ? this.wrapWords(words, box.w) : this.balance(words, box.w);
       const h = size * (1 + (lines.length - 1) * lh);
       if (lines.length > maxLines || h > box.h) return null;
@@ -118,7 +135,7 @@ export class Gfx {
     const capH = bestSize * (this.fontFor(role).capHeight ?? 0.72);
     const out = best.map((ws, li) => {
       let x = 0;
-      const placed = ws.map((wd) => { const w = this.measure(wd.text); const r = { ...wd, x, w }; x += w + sp; return r; });
+      const placed = ws.map((wd) => { const w = this.wordW(wd); const r = { ...wd, x, w }; x += w + sp; return r; });
       return { words: placed, w: x - sp, y: capH + li * bestSize * lh };
     });
     const h = capH + (out.length - 1) * bestSize * lh;
@@ -128,6 +145,7 @@ export class Gfx {
       for (const w of l.words) w.x += dx;
       l.x = dx;
     }
+    this._italicAccents = false;
     return { size: bestSize, lineH: bestSize * lh, capH, lines: out, w: Math.max(...out.map((l) => l.w)), h, role, opts: o };
   }
 
@@ -144,9 +162,10 @@ export class Gfx {
     const ctx = this.ctx, m = ctx.getTransform();
     // Exact ink bounds, so tightly stacked caps don't read as overlapping.
     const tm = ctx.measureText(str), size = this._size;
-    const w = tm.actualBoundingBoxRight + Math.max(0, -tm.actualBoundingBoxLeft) || this.measure(str);
+    // Ink spans [x - left, x + right]; left is negative when the string starts with a space.
+    const xl = x - tm.actualBoundingBoxLeft, xr = x + tm.actualBoundingBoxRight;
     const asc = tm.actualBoundingBoxAscent, desc = Math.max(0, tm.actualBoundingBoxDescent);
-    const pts = [[x, y - asc], [x + w, y - asc], [x, y + desc], [x + w, y + desc]]
+    const pts = [[xl, y - asc], [xr, y - asc], [xl, y + desc], [xr, y + desc]]
       .map(([px, py]) => [m.a * px + m.c * py + m.e, m.b * px + m.d * py + m.f]);
     const xs = pts.map((p) => p[0]), ys = pts.map((p) => p[1]);
     const scale = Math.hypot(m.a, m.b);

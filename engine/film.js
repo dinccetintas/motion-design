@@ -59,15 +59,18 @@ export function planCues(P) {
 }
 
 export class Film {
-  constructor(spec, canvas, assets = {}) {
+  /** opts.scale: preview resolution factor (renders always use 1). */
+  constructor(spec, canvas, assets = {}, opts = {}) {
     const P = plan(spec);
+    this.scale = opts.scale || 1;
     this.plan = P;
     this.spec = P.spec;
     const [W, H] = FORMATS[this.spec.format];
     this.W = W; this.H = H;
     this.canvas = canvas;
-    if (canvas.width !== W) canvas.width = W;
-    if (canvas.height !== H) canvas.height = H;
+    const cw = Math.round(W * this.scale), ch = Math.round(H * this.scale);
+    if (canvas.width !== cw) canvas.width = cw;
+    if (canvas.height !== ch) canvas.height = ch;
     this.ctx = canvas.getContext('2d');
     this.style = resolveStyle(this.spec.style, this.spec);
     this.g = new Gfx(this.ctx, W, H, this.style);
@@ -120,7 +123,7 @@ export class Film {
   /** Paint frame t. With probe=true, returns every text box drawn this frame. */
   seek(t, { probe = false } = {}) {
     const g = this.g, ctx = this.ctx;
-    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.setTransform(this.scale, 0, 0, this.scale, 0, 0);
     ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over'; ctx.filter = 'none';
     ctx.textBaseline = 'alphabetic'; ctx.textAlign = 'left';
     g.probe = probe ? [] : null;

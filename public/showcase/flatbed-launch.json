@@ -1,0 +1,143 @@
+{
+ "order": 1,
+ "hero": true,
+ "title": "Flatbed: cut on the beat",
+ "from": "a two-line brief about this studio",
+ "spec": {
+  "title": "Flatbed: cut on the beat",
+  "concept": "Every claim the studio makes lands on a beat: the film proves it is a film-cutting machine by cutting itself.",
+  "format": "9:16",
+  "style": "poster",
+  "palette": {
+   "dark": "#0A0A0A",
+   "light": "#F4F1EA",
+   "accent": "#FF5A1F"
+  },
+  "music": {
+   "mood": "drive",
+   "seed": 11
+  },
+  "brand": {
+   "name": "Flatbed",
+   "url": "flatbed.studio"
+  },
+  "scenes": [
+   {
+    "type": "title",
+    "beats": 4,
+    "ground": "dark",
+    "transition": "cut",
+    "props": {
+     "text": "Your idea. *Cut.*"
+    }
+   },
+   {
+    "type": "swap",
+    "beats": 8,
+    "ground": "light",
+    "transition": "panel",
+    "props": {
+     "prefix": "Paste a",
+     "words": [
+      "link",
+      "article",
+      "topic",
+      "thought"
+     ]
+    }
+   },
+   {
+    "type": "orbit",
+    "beats": 8,
+    "ground": "dark",
+    "transition": "slice",
+    "props": {
+     "center": "The crew",
+     "items": [
+      "Researcher",
+      "Writer",
+      "Art director",
+      "Director",
+      "Critic",
+      "Composer"
+     ]
+    }
+   },
+   {
+    "type": "justify",
+    "beats": 4,
+    "ground": "accent",
+    "transition": "cut",
+    "props": {
+     "lines": [
+      "Every frame",
+      "*on the beat*"
+     ]
+    }
+   },
+   {
+    "type": "counter",
+    "beats": 6,
+    "ground": "dark",
+    "transition": "wipe",
+    "props": {
+     "value": 60,
+     "suffix": " fps",
+     "label": "with *four* subframes of motion blur"
+    }
+   },
+   {
+    "type": "stack",
+    "beats": 7,
+    "ground": "light",
+    "transition": "push",
+    "props": {
+     "title": "Measured first",
+     "items": [
+      "Hook",
+      "Readability",
+      "*Rhythm*",
+      "Loudness"
+     ]
+    }
+   },
+   {
+    "type": "tunnel",
+    "beats": 6,
+    "ground": "dark",
+    "transition": "iris",
+    "props": {
+     "words": [
+      "Write",
+      "Design",
+      "Score",
+      "Cut"
+     ]
+    }
+   },
+   {
+    "type": "endcard",
+    "beats": 6,
+    "ground": "accent",
+    "transition": "zoom",
+    "props": {
+     "name": "Flatbed",
+     "tagline": "A motion design studio of agents",
+     "cta": "Cut my film",
+     "url": "flatbed.studio"
+    }
+   }
+  ]
+ },
+ "qa": {
+  "scores": {
+   "hook": 8.5,
+   "readability": 10,
+   "motion": 10,
+   "variety": 10,
+   "brand": 10,
+   "sync": 9
+  },
+  "overall": 9.6
+ }
+}

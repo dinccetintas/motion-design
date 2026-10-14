@@ -97,7 +97,7 @@ export const TRANSITIONS = {
     draw(g, p, A, B, o) {
       const { W, H, ctx } = g, e = ease.inOutExpo(p);
       g.save(); const s = 1 + 0.6 * e; ctx.translate(W / 2, H / 2); ctx.scale(s, s); ctx.translate(-W / 2, -H / 2); A(); g.restore();
-      const w = lerp(W * 0.18, W, e), h = lerp(W * 0.18, H, e), r = lerp(W * 0.09, 0, e);
+      const w = lerp(W * 0.04, W, e), h = lerp(W * 0.04, H, e), r = lerp(W * 0.02, 0, e);
       g.save(); ctx.beginPath(); ctx.roundRect((W - w) / 2, (H - h) / 2, w, h, r); ctx.clip();
       const s2 = lerp(0.85, 1, e); ctx.translate(W / 2, H / 2); ctx.scale(s2, s2); ctx.translate(-W / 2, -H / 2); B(); g.restore();
     },

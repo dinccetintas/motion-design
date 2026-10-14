@@ -21,7 +21,25 @@ export const title = {
     const ta = -0.1 + Math.max(0, accentIdx) * st;
     const k = 1 + bump(lt, ta + 0.05, 0.03);
     withPunch(g, ox + L.w / 2, oy + L.h / 2, k, () => {
-      const land = drawText(g, L, ox, oy, textOpts(P, lt, { start: -0.1, stagger: st, mode: 'rise', exitAt: exitAt(S) }));
+      let land;
+      if (g.portrait && L.lines.length > 1) {
+        // Poster set: every line scaled to the full width, so a vertical frame is filled edge to edge.
+        const src = L.lines.map((l) => l.words.map((w) => (w.accent ? `*${w.text}*` : w.text)).join(' '));
+        const fitAt = (cap) => src.map((s) => g.fit(s, { x: 0, y: 0, w: top.w, h: cap }, { role: 'display', maxLines: 1 }));
+        let fits = fitAt(top.h * 0.36);
+        const gap = g.u * 2.4, total = (fs) => fs.reduce((a, f) => a + f.capH, 0) + gap * (fs.length - 1);
+        if (total(fits) > top.h * 0.92) fits = src.map((s, i) => g.fit(s, { x: 0, y: 0, w: top.w, h: top.h }, { role: 'display', maxLines: 1, maxSize: fits[i].size * top.h * 0.92 / total(fits) }));
+        let y = top.y + (top.h - total(fits)) * 0.45, n = 0;
+        land = 0;
+        fits.forEach((f) => {
+          land = Math.max(land, drawText(g, f, ox, y, textOpts(P, lt, { start: -0.1 + n * st, stagger: st, mode: 'rise', exitAt: exitAt(S) })));
+          n += f.lines[0].words.length; y += f.capH + gap;
+        });
+        const rp = sp(lt - (land - 0.15), 'snap') * (1 - sp(lt - (exitAt(S) ?? 1e9), 'snap'));
+        if (rp > 0.001) g.rect(ox, y - gap + g.u * 2.2, top.w * rp, Math.max(8, g.u * 1.6), P.ground === 'accent' ? P.ink : P.hilite);
+        return;
+      }
+      land = drawText(g, L, ox, oy, textOpts(P, lt, { start: -0.1, stagger: st, mode: 'rise', exitAt: exitAt(S) }));
       // Accent rule shoots in under the block once the last word lands.
       const rp = sp(lt - (land - 0.15), 'snap') * (1 - sp(lt - (exitAt(S) ?? 1e9), 'snap'));
       if (rp > 0.001) g.rect(ox, oy + L.h + L.size * 0.16, L.w * rp, Math.max(6, L.size * 0.09), P.ground === 'accent' ? P.ink : P.hilite);
@@ -43,7 +61,7 @@ export const statement = {
   props: { text: 'sentence, 6-16 words, one *accent* word', mode: 'build | karaoke' },
   draw(g, p, lt, S) {
     const P = palette(g, S), box = g.safe;
-    const L = g.fit(p.text || '', { ...box, h: box.h * 0.86 }, { role: 'display', maxLines: g.portrait ? 7 : 4, maxSize: g.u * (g.portrait ? 24 : 15) });
+    const L = g.fit(p.text || '', { ...box, h: box.h * 0.86 }, { role: 'display', maxLines: g.portrait ? 7 : 4, maxSize: g.u * (g.portrait ? 24 : 21) });
     const n = L.lines.reduce((a, l) => a + l.words.length, 0);
     const st = clamp(Math.round((S.dur * 0.5 / n) / (S.beat / 4)) * (S.beat / 4), S.beat / 4, S.beat / 2);
     const oy = box.y + (box.h - L.h) * 0.45;
@@ -67,12 +85,12 @@ export const stack = {
     let area = box, tl = 0;
     if (p.title) {
       const [a, b] = splitV(box, g.portrait ? 0.2 : 0.24, g.u * 3);
-      const Lt = g.fit(p.title, a, { role: 'text', maxLines: 2, maxSize: g.u * 7, weight: 600 });
+      const Lt = g.fit(p.title, a, { role: 'display', maxLines: 2, maxSize: g.u * (g.portrait ? 10 : 8) });
       drawText(g, Lt, a.x, a.y + (a.h - Lt.h), textOpts(P, lt, { start: 0, stagger: 0.04, exitAt: exitAt(S) }));
       area = b; tl = S.beat * 0.5;
     }
     const n = Math.max(1, items.length), rowH = Math.min(area.h / n, g.u * (g.portrait ? 40 : 22));
-    const idxW = g.u * 9;
+    const idxW = g.u * 11;
     // Same type size for every row: the smallest fit wins.
     const fits = items.map((it) => g.fit(it, { x: 0, y: 0, w: area.w - idxW, h: rowH * 0.7 }, { role: 'display', maxLines: 2 }));
     const size = Math.min(...fits.map((f) => f.size));
@@ -83,7 +101,7 @@ export const stack = {
       const ry = y0 + k * rowH, t0 = at[k];
       const rp = ew(lt, t0, 0.5, ease.outExpo) * (1 - ew(lt, (exitAt(S) ?? 1e9) + k * 0.03, 0.3, ease.inExpo));
       g.rect(area.x, ry, area.w * rp, Math.max(2, g.u * 0.35), alpha(P.ink, 0.5));
-      g.font(g.u * 3.6, 'mono');
+      g.font(g.u * 4.6, 'mono');
       if (rp > 0.3) g.text(String(k + 1).padStart(2, '0'), area.x, ry + g.u * 5, P.ground === 'accent' ? P.ink : P.accent);
       drawText(g, L, area.x + idxW, ry + (rowH - L.h) / 2, textOpts(P, lt, { start: t0 + 0.04, stagger: 0.05, mode: 'rise', exitAt: exitAt(S) }));
     });
@@ -128,9 +146,9 @@ export const swap = {
 };
 /** Slot changes land on whole beats. */
 function swapTiming(S, n) {
-  const start = S.beat * 0.5;
-  const step = Math.max(1, Math.floor((S.dur - S.beat * 1.5) / Math.max(1, n) / S.beat)) * S.beat;
-  return { step, start };
+  const start = S.beat * 0.5, half = S.beat / 2;
+  const x = (S.dur - start - S.beat * 0.75) / Math.max(1, n);
+  return { step: Math.max(S.beat, Math.floor(x / half) * half), start };
 }
 
 export const marquee = {
@@ -175,10 +193,10 @@ export const quote = {
     g.text('“', box.x - g.u, box.y + markSize * 0.62, P.ground === 'accent' ? P.ink : P.accent, { decor: true });
     g.ctx.globalAlpha = 1;
     const area = { x: box.x, y: box.y + markSize * 0.45, w: box.w, h: box.h - markSize * 0.45 - g.u * 16 };
-    const L = g.fit(p.text || '', area, { role: 'display', maxLines: g.portrait ? 9 : 5, maxSize: g.u * (g.portrait ? 17 : 12), caps: false });
+    const L = g.fit(p.text || '', area, { role: 'display', maxLines: g.portrait ? 9 : 4, maxSize: g.u * (g.portrait ? 17 : 17), caps: false });
     const n = L.lines.reduce((a, l) => a + l.words.length, 0);
     const st = clamp(S.dur * 0.35 / n, 0.025, 0.09);
-    const land = drawText(g, L, area.x, area.y, textOpts(P, lt, { start: S.beat * 0.5, stagger: st, mode: 'rise', exitAt: exitAt(S) }));
+    const land = drawText(g, L, area.x, area.y, textOpts(P, lt, { start: 0.12, stagger: st, mode: 'rise', exitAt: exitAt(S) }));
     const ay = area.y + L.h + g.u * 9;
     const rp = ew(lt, land, 0.6, ease.outExpo);
     g.rect(box.x, ay - g.u * 1.4, g.u * 8 * rp, Math.max(3, g.u * 0.5), P.ground === 'accent' ? P.ink : P.accent);
@@ -214,9 +232,10 @@ export const tunnel = {
       const d = (lt - ti + step * 0.9) / (step * 0.9);
       let s;
       if (d <= 0) return;
-      if (last) s = 0.04 + 0.96 * sp(lt - ti, 'heavy');
-      else s = d < 1 ? Math.pow(d, 3) : Math.pow(d, 5);
-      const a = last ? clamp(d * 3) : clamp(d * 3) * (1 - clamp((s - 2.2) / 2));
+      if (last) s = 0.08 + 0.92 * sp(lt - ti + step * 0.25, 'heavy');
+      // Approach, hold at the screen plane long enough to read, then fly past the camera.
+      else s = d < 1 ? 0.08 + 0.92 * Math.pow(d, 1.7) : d < 1.55 ? 1 + 0.18 * (d - 1) : 1.1 + Math.pow((d - 1.55) * 3, 3);
+      const a = last ? clamp(d * 3) : clamp(d * 3) * (1 - clamp((s - 2.4) / 2.5));
       if (a <= 0.01 || s > 9) return;
       g.save();
       ctx.globalAlpha = a;

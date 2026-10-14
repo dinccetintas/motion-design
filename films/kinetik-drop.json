@@ -1,0 +1,96 @@
+{
+ "title": "Kinetik Volt 01",
+ "concept": "A drop film that never stops moving: every scene hands its momentum to the next.",
+ "format": "4:5",
+ "style": "loud",
+ "palette": {
+  "dark": "#0D0D0D",
+  "light": "#F2F2EC",
+  "accent": "#D7FF1E"
+ },
+ "music": {
+  "mood": "hype",
+  "seed": 9
+ },
+ "showcase": {
+  "order": 4,
+  "from": "a brief for a fictional sneaker drop"
+ },
+ "scenes": [
+  {
+   "type": "tunnel",
+   "beats": 6,
+   "ground": "dark",
+   "transition": "cut",
+   "props": {
+    "words": [
+     "Ready",
+     "Set",
+     "Volt"
+    ]
+   }
+  },
+  {
+   "type": "marquee",
+   "beats": 6,
+   "ground": "accent",
+   "transition": "cut",
+   "props": {
+    "words": [
+     "RUN",
+     "JUMP",
+     "FLY"
+    ]
+   }
+  },
+  {
+   "type": "counter",
+   "beats": 6,
+   "ground": "dark",
+   "transition": "slice",
+   "props": {
+    "value": 198,
+    "suffix": "g",
+    "label": "the *lightest* shoe we have made"
+   }
+  },
+  {
+   "type": "stack",
+   "beats": 6,
+   "ground": "light",
+   "transition": "push",
+   "props": {
+    "items": [
+     "Carbon plate",
+     "*Foam* that returns",
+     "Knit upper"
+    ]
+   }
+  },
+  {
+   "type": "justify",
+   "beats": 4,
+   "ground": "dark",
+   "transition": "cut",
+   "props": {
+    "lines": [
+     "Drops",
+     "*Friday*",
+     "10:00"
+    ]
+   }
+  },
+  {
+   "type": "endcard",
+   "beats": 6,
+   "ground": "accent",
+   "transition": "zoom",
+   "props": {
+    "name": "Kinetik",
+    "tagline": "Volt 01. First 500 pairs.",
+    "cta": "Get notified",
+    "url": "kinetik.example"
+   }
+  }
+ ]
+}

@@ -1,0 +1,142 @@
+{
+ "order": 2,
+ "hero": false,
+ "title": "Where time stops",
+ "from": "a topic: “How black holes bend time”",
+ "spec": {
+  "title": "Where time stops",
+  "concept": "Falling inward: each scene goes one step closer to the event horizon.",
+  "format": "16:9",
+  "style": "folio",
+  "palette": {
+   "dark": "#07080C",
+   "light": "#EEEAE2",
+   "accent": "#FF8A3D"
+  },
+  "music": {
+   "mood": "cinematic",
+   "seed": 4
+  },
+  "scenes": [
+   {
+    "type": "title",
+    "beats": 4,
+    "ground": "dark",
+    "transition": "cut",
+    "props": {
+     "text": "Where *time* stops"
+    }
+   },
+   {
+    "type": "statement",
+    "beats": 6,
+    "ground": "light",
+    "transition": "wipe",
+    "props": {
+     "text": "Past the event horizon nothing escapes. Not even *light*."
+    }
+   },
+   {
+    "type": "counter",
+    "beats": 6,
+    "ground": "dark",
+    "transition": "push",
+    "props": {
+     "value": 4,
+     "suffix": " million",
+     "label": "suns of mass at the center of our *galaxy*"
+    }
+   },
+   {
+    "type": "compare",
+    "beats": 7,
+    "ground": "dark",
+    "transition": "slice",
+    "props": {
+     "title": "Two giants",
+     "left": {
+      "label": "Sagittarius A, Milky Way",
+      "value": "4 million suns"
+     },
+     "right": {
+      "label": "M87, Virgo cluster",
+      "value": "6.5 billion suns"
+     }
+    }
+   },
+   {
+    "type": "timeline",
+    "beats": 9,
+    "ground": "light",
+    "transition": "panel",
+    "props": {
+     "title": "How we found them",
+     "items": [
+      {
+       "label": "1916",
+       "text": "Schwarzschild's solution"
+      },
+      {
+       "label": "1971",
+       "text": "Cygnus X-1"
+      },
+      {
+       "label": "2015",
+       "text": "Gravitational waves"
+      },
+      {
+       "label": "2019",
+       "text": "The first image"
+      }
+     ]
+    }
+   },
+   {
+    "type": "quote",
+    "beats": 8,
+    "ground": "dark",
+    "transition": "zoom",
+    "props": {
+     "text": "Black holes ain't as black as they are *painted*.",
+     "author": "Stephen Hawking",
+     "role": "Reith Lectures, 2016"
+    }
+   },
+   {
+    "type": "tunnel",
+    "beats": 6,
+    "ground": "dark",
+    "transition": "iris",
+    "props": {
+     "words": [
+      "Gas",
+      "Stars",
+      "Light",
+      "Time"
+     ]
+    }
+   },
+   {
+    "type": "endcard",
+    "beats": 6,
+    "ground": "accent",
+    "transition": "cut",
+    "props": {
+     "name": "Event horizon",
+     "tagline": "A two-minute idea in thirty seconds"
+    }
+   }
+  ]
+ },
+ "qa": {
+  "scores": {
+   "hook": 10,
+   "readability": 9,
+   "motion": 10,
+   "variety": 10,
+   "brand": 9,
+   "sync": 8.9
+  },
+  "overall": 9.5
+ }
+}

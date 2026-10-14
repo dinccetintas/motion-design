@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Studio — Flatbed</title>
+<meta name="theme-color" content="#0A0A0A">
+<link rel="icon" href="/img/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/fonts/fonts.css">
+<link rel="stylesheet" href="/css/flatbed.css">
+<link rel="stylesheet" href="/css/studio.css">
+</head>
+<body>
+<div class="app" id="app" data-state="empty">
+  <header class="bar">
+    <a class="wordmark" href="/" aria-label="Flatbed home"><span class="sprocket" aria-hidden="true"></span><span class="name">Flatbed</span></a>
+    <div class="slate">
+      <span class="label dim">Film</span>
+      <h1 class="slate-title" id="film-title">New film</h1>
+      <span class="crew-state label" id="crew-state" data-busy="false"><span class="dot" aria-hidden="true"></span><span id="crew-state-text">Crew ready</span></span>
+    </div>
+    <div class="bar-actions">
+      <a class="tab small ghost" href="/studio" id="new-film">New film</a>
+      <button class="tab small" type="button" id="render-draft" disabled>Draft MP4</button>
+      <button class="tab small solid" type="button" id="render-master" disabled>Master MP4</button>
+    </div>
+    <div class="render-line" id="render-line" aria-hidden="true"><i></i></div>
+  </header>
+
+  <aside class="crew" aria-label="The crew">
+    <div class="crew-head"><h2 class="label">The crew</h2><span class="mono dim" id="engine-mode"></span></div>
+    <ol class="log" id="log" aria-live="polite"></ol>
+    <form class="composer" id="composer">
+      <label class="sr-only" for="msg">Message the crew</label>
+      <textarea class="field" id="msg" rows="3" placeholder="Paste a link, an article or a topic"></textarea>
+      <div class="composer-row">
+        <div class="chips" id="chips"></div>
+        <button class="tab small solid" type="submit" id="send">Cut</button>
+      </div>
+    </form>
+  </aside>
+
+  <main class="stage" id="stage">
+    <section class="empty" id="empty" aria-labelledby="empty-h">
+      <h2 class="cond" id="empty-h">What are we cutting?</h2>
+      <p class="dim">A link, a pasted article, a topic, or a few lines about the film you want. Add a format or a length if you have one in mind.</p>
+      <form class="composer big" id="empty-form">
+        <label class="sr-only" for="empty-msg">What is the film about?</label>
+        <textarea class="field" id="empty-msg" rows="3" placeholder="https://your-site.com, an article, or “a 20-second launch film for…”"></textarea>
+        <div class="composer-row">
+          <div class="chips" id="empty-chips"></div>
+          <button class="tab solid" type="submit">Cut my film</button>
+        </div>
+      </form>
+      <div class="recent" id="recent" hidden>
+        <h3 class="label dim">Recent films</h3>
+        <ul class="recent-list" id="recent-list"></ul>
+      </div>
+    </section>
+
+    <section class="viewer" id="viewer" aria-label="Film preview">
+      <div class="screen" id="screen"><canvas id="film" aria-label="Film preview"></canvas>
+        <div class="screen-wait" id="screen-wait" hidden><span class="flag" aria-hidden="true"></span><span class="label" id="screen-wait-text">The crew is working</span></div>
+      </div>
+      <div class="transport">
+        <button class="icon-btn" type="button" id="play" aria-label="Play" title="Play (Space)"><svg viewBox="0 0 24 24" aria-hidden="true"><path class="i-play" d="M7 4.5v15l12.5-7.5z"/><g class="i-pause"><rect x="6" y="4.5" width="4.2" height="15" rx="1"/><rect x="13.8" y="4.5" width="4.2" height="15" rx="1"/></g></svg></button>
+        <span class="mono tc" id="tc">00:00:00</span><span class="mono dim tc-total" id="tc-total">/ 00:00:00</span>
+        <span class="label scene-now" id="scene-now"></span>
+        <span class="mono dim beat-now" id="beat-now"></span>
+        <div class="formats seg" role="group" aria-label="Format" id="formats">
+          <button type="button" data-format="9:16">9:16</button><button type="button" data-format="16:9">16:9</button><button type="button" data-format="1:1">1:1</button><button type="button" data-format="4:5">4:5</button>
+        </div>
+        <button class="icon-btn" type="button" id="mute" aria-pressed="false" aria-label="Sound on" title="Sound"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5h4l5-4v13l-5-4H4z"/><path class="i-wave" d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path class="i-x" d="M16 9.5l5 5M21 9.5l-5 5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+      </div>
+    </section>
+  </main>
+
+  <section class="rail" id="rail" aria-label="Timeline: scenes on the beat">
+    <div class="rail-scroll" id="rail-scroll">
+      <div class="rail-inner grain-orange" id="rail-inner">
+        <div class="perf-row"></div>
+        <div class="rail-ruler" id="rail-ruler"></div>
+        <div class="rail-frames" id="rail-frames"></div>
+        <div class="perf-row"></div>
+        <div class="playhead" id="playhead"><span class="flag"></span><i></i></div>
+      </div>
+    </div>
+  </section>
+
+  <aside class="inspector" aria-label="Inspector">
+    <div class="tabs" role="tablist" aria-label="Inspector">
+      <button role="tab" aria-selected="true" aria-controls="pane-scene" id="t-scene">Scene</button>
+      <button role="tab" aria-selected="false" aria-controls="pane-film" id="t-film">Film</button>
+      <button role="tab" aria-selected="false" aria-controls="pane-review" id="t-review">Review</button>
+      <button role="tab" aria-selected="false" aria-controls="pane-takes" id="t-takes">Takes</button>
+    </div>
+    <div class="pane" role="tabpanel" id="pane-scene" aria-labelledby="t-scene"></div>
+    <div class="pane" role="tabpanel" id="pane-film" aria-labelledby="t-film" hidden></div>
+    <div class="pane" role="tabpanel" id="pane-review" aria-labelledby="t-review" hidden></div>
+    <div class="pane" role="tabpanel" id="pane-takes" aria-labelledby="t-takes" hidden></div>
+  </aside>
+</div>
+<script type="module" src="/js/studio.js"></script>
+</body>
+</html>

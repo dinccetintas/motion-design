@@ -55,7 +55,7 @@ export async function analyze(spec, opts = {}) {
       const rel = b.size / minDim;
       smallest = Math.min(smallest, rel);
       if (rel < 0.028) { readPen += 1.2; add('major', 'readability', si, `"${b.text}" is ${Math.round(b.size)}px, unreadable on a phone.`, 'Shorten the copy so it can be set larger, or split it across two scenes.'); }
-      else if (rel < 0.034) { readPen += 0.4; add('minor', 'readability', si, `"${b.text}" is small (${Math.round(b.size)}px).`, 'Fewer words in this scene lets the type grow.'); }
+      else if (rel < 0.042) { readPen += 0.4; add('minor', 'readability', si, `"${b.text}" is small (${Math.round(b.size)}px).`, 'Fewer words in this scene lets the type grow.'); }
       if (!b.stroke) {
         worstContrast = Math.min(worstContrast, b.contrast);
         const need = rel > 0.06 ? 3 : 4.5;

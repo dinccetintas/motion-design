@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Flatbed — a motion design studio run by agents</title>
+<meta name="description" content="Paste a link, an article or a topic. A crew of AI agents writes, designs, scores and cuts a motion design film on the beat, and measures it before you see it.">
+<meta name="theme-color" content="#0A0A0A">
+<link rel="icon" href="/img/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/fonts/fonts.css">
+<link rel="stylesheet" href="/css/flatbed.css">
+<link rel="stylesheet" href="/css/landing.css">
+</head>
+<body>
+<a class="sr-only" href="#main">Skip to content</a>
+<header class="top">
+  <a class="wordmark" href="/" aria-label="Flatbed home"><span class="sprocket" aria-hidden="true"></span><span class="name">Flatbed</span></a>
+  <nav aria-label="Primary">
+    <a href="#reel">Showreel</a>
+    <a href="#crew">The crew</a>
+    <a href="#measured">Measured</a>
+    <a href="#bench">The bench</a>
+  </nav>
+  <a class="tab small" href="/studio">Open the studio</a>
+</header>
+
+<main id="main">
+  <section class="hero">
+    <div class="hero-copy">
+      <h1 class="cond"><span>Your idea.</span><span class="accent">Cut on the beat.</span></h1>
+      <p class="lede">Paste a link, an article or a topic. A crew of agents researches it, writes it, designs it, composes the music and cuts a motion design film, then measures every frame before you see it.</p>
+      <form class="composer" id="hero-form" action="/studio" method="get">
+        <label class="sr-only" for="hero-input">What is the film about?</label>
+        <textarea class="field" id="hero-input" name="brief" rows="2" placeholder="https://your-site.com, a pasted article, or a topic" required></textarea>
+        <div class="composer-row">
+          <div class="tries" aria-label="Examples">
+            <button type="button" class="try" data-try="How black holes bend time">Topic</button>
+            <button type="button" class="try" data-try="https://en.wikipedia.org/wiki/Bauhaus make it 16:9">Link</button>
+            <button type="button" class="try" data-try="A launch film for a coffee subscription that roasts to order, 20 seconds, energetic">Brief</button>
+          </div>
+          <button class="tab solid" type="submit">Cut my film</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="hero-rail" aria-label="A film cutting itself on the rail">
+      <div class="rail-band grain-orange">
+        <div class="perf-row"></div>
+        <div class="ruler-wrap"><div class="ruler" id="hero-ruler"></div><div class="flag" id="hero-flag"></div></div>
+        <div class="strip" id="hero-strip"></div>
+        <div class="perf-row"></div>
+      </div>
+      <div class="rail-meta">
+        <span class="label" id="hero-title">Loading the reel</span>
+        <span class="mono dim" id="hero-tc">00:00:00</span>
+        <button class="tab small ghost" id="hero-sound" type="button" aria-pressed="false">Sound off</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="reel" id="reel" aria-labelledby="reel-h">
+    <header class="sec-head"><h2 class="cond" id="reel-h">Showreel</h2><p class="dim">Every film below is playing live from the same engine that renders the MP4. Nothing is pre-recorded.</p></header>
+    <div class="reel-rail"><div class="perf-row"></div><div class="reel-grid" id="reel-grid"></div><div class="perf-row"></div></div>
+  </section>
+
+  <section class="crew" id="crew" aria-labelledby="crew-h">
+    <header class="sec-head"><h2 class="cond" id="crew-h">The crew</h2><p class="dim">Six specialists, one brief. You watch them work, and you talk to them like you would to a studio.</p></header>
+    <div class="crew-line" aria-hidden="true"></div>
+    <ol class="crew-list" id="crew-list"></ol>
+  </section>
+
+  <section class="measured" id="measured" aria-labelledby="measured-h">
+    <header class="sec-head"><h2 class="cond" id="measured-h">Measured before you see it</h2><p class="dim">The critic renders a contact sheet, probes every word on every frame and scores the cut. Anything under 8 goes back to the director.</p></header>
+    <div class="measure-table" id="measure-table" role="table" aria-label="Scores of the showreel films"></div>
+  </section>
+
+  <section class="bench" id="bench" aria-labelledby="bench-h">
+    <header class="sec-head"><h2 class="cond" id="bench-h">The bench</h2><p class="dim">Films are code, not generated pixels: crisp type, exact brand colors, real screenshots, and revisions that change exactly what you asked.</p></header>
+    <dl class="specs">
+      <div><dt class="label">Scenes</dt><dd class="cond">21</dd><p>kinetic type, counters, charts, orbits, globes, code, real screenshots</p></div>
+      <div><dt class="label">Styles</dt><dd class="cond">10</dd><p>complete type and color systems, or your brand's own colors</p></div>
+      <div><dt class="label">Music</dt><dd class="cond">7</dd><p>moods composed for each cut, every hit on the beat grid</p></div>
+      <div><dt class="label">Frames</dt><dd class="cond">60</dd><p>per second, each blended from four subframes of motion blur</p></div>
+      <div><dt class="label">Loudness</dt><dd class="cond">−14</dd><p>LUFS, true peak under −1 dB, ready for every platform</p></div>
+      <div><dt class="label">Formats</dt><dd class="cond">4</dd><p>9:16, 16:9, 1:1 and 4:5 from one cut</p></div>
+    </dl>
+  </section>
+
+  <section class="close grain-orange" aria-labelledby="close-h">
+    <div class="perf-row"></div>
+    <div class="close-inner">
+      <h2 class="cond" id="close-h">Bring the idea.<br>We'll bring the beat.</h2>
+      <form class="composer composer-dark" id="close-form" action="/studio" method="get">
+        <label class="sr-only" for="close-input">What is the film about?</label>
+        <textarea class="field" id="close-input" name="brief" rows="2" placeholder="A link, an article, or a topic" required></textarea>
+        <button class="tab solid dark-tab" type="submit">Cut my film</button>
+      </form>
+    </div>
+    <div class="perf-row"></div>
+  </section>
+</main>
+
+<footer class="foot">
+  <span class="wordmark"><span class="sprocket" aria-hidden="true"></span><span class="name">Flatbed</span></span>
+  <span class="dim">Films rendered in code. Music composed in code. Fonts under the SIL Open Font License.</span>
+</footer>
+<script type="module" src="/js/landing.js"></script>
+</body>
+</html>

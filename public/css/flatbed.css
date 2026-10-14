@@ -1,0 +1,125 @@
+/* Flatbed: a film cutting bench flattened into a page.
+   True black ink, grain-orange rail, punched-white windows. One condensed grotesk in caps
+   for labels and headlines, a semi-condensed grotesk for reading, mono only for timecode
+   and measurements. State is a mark: grease cross = approved, tape flag = playhead. */
+
+:root {
+  --ink: #0A0A0A;
+  --char: #131313;
+  --char-2: #1A1A1A;
+  --spool: #2A2A2A;
+  --rule: #3A3A3A;
+  --dim: #A7A196;
+  --white: #F4F1EA;
+  --white-2: #E6E1D6;
+  --orange: #FF5A1F;
+  --orange-hot: #FF7440;
+  --orange-deep: #D9440F;
+  --on-orange: #0A0A0A;
+  --red-grease: #F4F1EA;
+
+  --f-cond: 'Big Shoulders Display', 'Archivo', system-ui, sans-serif;
+  --f-text: 'Archivo', system-ui, sans-serif;
+  --f-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  --step: 8px;
+  --r: 4px;
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+
+  /* Coarse film grain, procedural (SVG turbulence), multiplied onto orange. */
+  --grain: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='1.1' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.32 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  /* One sprocket hole, repeated along rails. */
+  --perf: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='28' height='16'><rect x='7' y='3' width='14' height='10' rx='2.5' fill='%230A0A0A'/></svg>");
+
+  color-scheme: dark;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+body {
+  margin: 0; background: var(--ink); color: var(--white);
+  font: 400 16px/1.55 var(--f-text); font-stretch: 92%;
+  -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
+}
+::selection { background: var(--orange); color: var(--on-orange); }
+:focus-visible { outline: 2px solid var(--orange); outline-offset: 3px; }
+a { color: inherit; text-decoration-color: var(--orange); text-underline-offset: 0.22em; text-decoration-thickness: 2px; }
+img, canvas, video { display: block; max-width: 100%; }
+button, input, textarea, select { font: inherit; color: inherit; }
+* { scrollbar-width: thin; scrollbar-color: var(--rule) transparent; }
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-thumb { background: var(--rule); border-radius: 4px; }
+
+/* ---- Type -------------------------------------------------------------- */
+.cond { font-family: var(--f-cond); font-weight: 800; text-transform: uppercase; letter-spacing: 0.01em; line-height: 0.92; }
+.label { font-family: var(--f-cond); font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; font-size: 14px; line-height: 1.2; }
+.mono { font-family: var(--f-mono); font-variant-numeric: tabular-nums; letter-spacing: 0; }
+.dim { color: var(--dim); }
+.accent { color: var(--orange); }
+
+/* ---- Materials ----------------------------------------------------------- */
+.grain-orange { background-color: var(--orange); background-image: var(--grain); background-blend-mode: multiply; color: var(--on-orange); }
+.perf-row { height: 16px; background: var(--perf) repeat-x 0 0 / 28px 16px; }
+.punched { background: var(--white); color: var(--ink); }
+
+/* ---- Perforated tab (buttons) -------------------------------------------- */
+.tab {
+  --tab-bg: transparent; --tab-fg: var(--white); --tab-line: var(--orange);
+  position: relative; display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+  min-height: 44px; padding: 0 30px; border: 1.5px solid var(--tab-line); border-radius: var(--r);
+  background: var(--tab-bg); color: var(--tab-fg); cursor: pointer; text-decoration: none; white-space: nowrap;
+  font-family: var(--f-cond); font-weight: 800; font-size: 17px; letter-spacing: 0.08em; text-transform: uppercase;
+  transition: transform 160ms var(--ease-out), background-color 160ms ease, color 160ms ease, border-color 160ms ease;
+  -webkit-tap-highlight-color: transparent;
+}
+/* Sprocket dots at both edges of every tab. */
+.tab::before, .tab::after {
+  content: ''; position: absolute; top: 50%; width: 5px; height: 22px; transform: translateY(-50%);
+  background: radial-gradient(circle, currentColor 1.6px, transparent 2.2px) 0 0 / 5px 7.33px repeat-y; opacity: 0.85;
+}
+.tab::before { left: 9px; }
+.tab::after { right: 9px; }
+.tab:active { transform: scale(0.97); }
+.tab[disabled], .tab[aria-disabled="true"] { opacity: 0.4; cursor: not-allowed; }
+.tab.solid { --tab-bg: var(--orange); --tab-fg: var(--on-orange); --tab-line: var(--orange); }
+.tab.ghost { --tab-line: var(--rule); }
+.tab.small { min-height: 34px; padding: 0 24px; font-size: 14px; }
+.tab.small::before, .tab.small::after { height: 15px; }
+@media (hover: hover) and (pointer: fine) {
+  .tab.solid:hover { --tab-bg: var(--orange-hot); }
+  .tab:not(.solid):hover { --tab-line: var(--orange); color: var(--orange); }
+}
+
+/* ---- Inputs ---------------------------------------------------------------- */
+.field {
+  width: 100%; border: 1.5px solid var(--rule); border-radius: var(--r); background: var(--char);
+  padding: 12px 14px; color: var(--white); resize: none; transition: border-color 160ms ease;
+}
+.field::placeholder { color: #8a857c; }
+.field:focus { outline: none; border-color: var(--orange); }
+
+/* ---- Marks: state is a mark, not a hue ------------------------------------ */
+.flag { /* folded tape flag */
+  width: 22px; height: 30px; background: var(--orange); background-image: var(--grain); background-blend-mode: multiply;
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 74%, 0 100%);
+}
+.cross { /* grease-pencil cross: approved */
+  width: 18px; height: 18px; flex: none;
+  background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'><path d='M3 3.5 L17 16.5 M16.5 3 L3.5 17' stroke='%23F4F1EA' stroke-width='3.2' stroke-linecap='round' fill='none'/></svg>") center / contain no-repeat;
+}
+.pin { width: 10px; height: 10px; border-radius: 50%; background: var(--orange); box-shadow: 0 1px 0 rgba(0,0,0,.6); flex: none; }
+
+/* ---- Wordmark ------------------------------------------------------------- */
+.wordmark { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; }
+.wordmark .sprocket { width: 16px; height: 24px; border-radius: 2px; background: var(--orange);
+  -webkit-mask: radial-gradient(circle at 50% 4px, transparent 2.4px, #000 2.6px) 0 0 / 16px 8px repeat-y; mask: radial-gradient(circle at 50% 4px, transparent 2.4px, #000 2.6px) 0 0 / 16px 8px repeat-y; }
+.wordmark .name { font-family: var(--f-cond); font-weight: 800; font-size: 28px; letter-spacing: 0.02em; text-transform: uppercase; line-height: 1; color: var(--white); }
+
+/* ---- Utilities ------------------------------------------------------------- */
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+.ruler { height: 18px; background: repeating-linear-gradient(90deg, currentColor 0 1.5px, transparent 1.5px 100%) 0 100% / var(--pitch, 24px) 10px repeat-x; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 1ms !important; animation-iteration-count: 1 !important; transition-duration: 1ms !important; scroll-behavior: auto !important; }
+}

@@ -29,8 +29,9 @@ function odometer(g, value, dec, x, y, size, color, o = {}) {
     const v = scaled / Math.pow(10, c.pos);
     const d = v % 10, base = Math.floor(d), frac = d - base;
     // Only the fractional part of the lowest moving columns rolls; snap integers otherwise.
-    const lower = (scaled % Math.pow(10, c.pos)) / Math.pow(10, c.pos);   // 0..1 progress of the columns below
-    const roll = c.pos === 0 ? frac : lower > 0.9 ? (lower - 0.9) * 10 : 0;
+    // A column rolls only during the last unit step of the columns below it (199.x -> 200).
+    const below = scaled % Math.pow(10, c.pos), lastStep = Math.pow(10, c.pos) - 1;
+    const roll = c.pos === 0 ? frac : clamp(below - lastStep);
     const visible = v >= 1 || c.pos === 0 || c.pos < dec + 1;
     if (!visible && v < 0.001) { cx += dw; continue; }
     g.save(); g.clipRect(cx - size * 0.05, y - capH - size * 0.06, dw + size * 0.1, capH + size * 0.12);
@@ -56,9 +57,14 @@ export const counter = {
     const pre = p.prefix || '', suf = p.suffix || '';
     // Size the number to fill the width at its final value; center number+bar+label as one block.
     const full = pre + fmt(value, dec) + suf;
-    const Lf = g.fit(full, { ...box, h: box.h * (g.portrait ? 0.34 : 0.5) }, { role: 'display', maxLines: 1, caps: false });
+    let Lf = g.fit(full, { ...box, h: box.h * (g.portrait ? 0.34 : 0.5) }, { role: 'display', maxLines: 1, caps: false });
+    // Odometer cells are as wide as the widest digit: refit on that true width.
+    g.font(Lf.size, 'display', { caps: false });
+    const cellW = Math.max(...'0123456789'.split('').map((d) => g.measure(d)));
+    const trueW = g.measure(pre) + g.measure(suf) + [...fmt(value, dec)].reduce((a, ch) => a + (/\d/.test(ch) ? cellW : g.measure(ch)), 0);
+    if (trueW > box.w) Lf = g.fit(full, { ...box, h: box.h }, { role: 'display', maxLines: 1, caps: false, maxSize: Lf.size * box.w / trueW * 0.98 });
     const size = Lf.size;
-    const Lb = p.label ? g.fit(p.label, { x: 0, y: 0, w: box.w, h: box.h * (g.portrait ? 0.3 : 0.25) }, { role: 'display', maxLines: 3, maxSize: g.u * (g.portrait ? 13 : 9) }) : null;
+    const Lb = p.label ? g.fit(p.label, { x: 0, y: 0, w: box.w, h: box.h * (g.portrait ? 0.3 : 0.25) }, { role: 'display', maxLines: 3, maxSize: g.u * (g.portrait ? 13 : 12) }) : null;
     const blockH = Lf.capH + g.u * 12 + (Lb ? Lb.h : 0);
     const top = { x: box.x, y: box.y + (box.h - blockH) * 0.46, w: box.w, h: Lf.capH + g.u * 2 };
     const bot = { x: box.x, y: top.y + top.h + g.u * 4, w: box.w, h: Lb ? Lb.h + g.u * 8 : 0 };

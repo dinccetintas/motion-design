@@ -198,24 +198,24 @@ export const endcard = {
     });
     y += L.h + g.u * 6;
     if (p.tagline) {
-      const Lt = g.fit(p.tagline, { x: 0, y: 0, w: box.w, h: g.u * 14 }, { role: 'text', maxLines: 2, maxSize: g.u * 6 });
+      const Lt = g.fit(p.tagline, { x: 0, y: 0, w: box.w, h: g.u * 18 }, { role: 'text', maxLines: 2, maxSize: g.u * (g.portrait ? 8 : 6) });
       drawText(g, Lt, box.x, y, textOpts(P, lt, { start: land + 0.15, stagger: 0.04, mode: 'rise' }));
       y += Lt.h + g.u * 9;
     }
     if (p.cta) {
       const cp = sp(lt - (land + 0.5), g.style.motion.obj);
-      g.font(g.u * 5, 'text', { weight: 700 });
-      const tw = g.measure(p.cta), ph = g.u * 11, pw = tw + g.u * 10;
+      g.font(g.u * (g.portrait ? 6.4 : 5), 'text', { weight: 700 });
+      const tw = g.measure(p.cta), ph = g.u * (g.portrait ? 14 : 11), pw = tw + g.u * 12;
       if (cp > 0.01) {
         ctx.save(); ctx.translate(box.x, y + (1 - cp) * g.u * 10); ctx.globalAlpha = clamp(cp * 2);
         g.rrect(0, 0, pw, ph, g.style.radius ? ph / 2 : 0, P.ground === 'accent' ? P.ink : P.hilite);
-        g.text(p.cta, g.u * 5, ph * 0.64, P.ground === 'accent' ? P.bg : g.style.grounds.accent.ink);
+        g.text(p.cta, g.u * 6, ph * 0.64, P.ground === 'accent' ? P.bg : g.style.grounds.accent.ink);
         ctx.restore();
       }
       y += ph + g.u * 6;
     }
     if (p.url) {
-      g.font(g.u * 4, 'mono');
+      g.font(g.u * (g.portrait ? 5 : 4), 'mono');
       g.text(typed(String(p.url).replace(/^https?:\/\//, ''), lt, land + 0.8, 30), box.x, y + g.u * 3, alpha(P.ink, 0.8));
     }
   },

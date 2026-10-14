@@ -1,0 +1,113 @@
+{
+ "title": "The four-day week",
+ "concept": "The numbers do the arguing: every scene is one result from the UK pilot.",
+ "format": "1:1",
+ "style": "funnel",
+ "palette": {
+  "dark": "#11131A",
+  "light": "#F2F0EA",
+  "accent": "#2F5BFF"
+ },
+ "music": {
+  "mood": "bright",
+  "seed": 7
+ },
+ "showcase": {
+  "order": 3,
+  "from": "an article on the UK four-day week pilot (Autonomy, 2023)"
+ },
+ "scenes": [
+  {
+   "type": "title",
+   "beats": 4,
+   "ground": "light",
+   "transition": "cut",
+   "props": {
+    "text": "Four days. *Same* work."
+   }
+  },
+  {
+   "type": "counter",
+   "beats": 6,
+   "ground": "dark",
+   "transition": "panel",
+   "props": {
+    "value": 61,
+    "label": "UK companies tried a *four-day* week"
+   }
+  },
+  {
+   "type": "bars",
+   "beats": 8,
+   "ground": "light",
+   "transition": "wipe",
+   "props": {
+    "title": "Six months later",
+    "items": [
+     {
+      "label": "Kept it",
+      "value": 92
+     },
+     {
+      "label": "Less burnout",
+      "value": 71
+     },
+     {
+      "label": "Fewer sick days",
+      "value": 65
+     }
+    ],
+    "unit": "%"
+   }
+  },
+  {
+   "type": "statement",
+   "beats": 7,
+   "ground": "accent",
+   "transition": "slice",
+   "props": {
+    "text": "Revenue held *steady*. People got a day back."
+   }
+  },
+  {
+   "type": "swap",
+   "beats": 8,
+   "ground": "dark",
+   "transition": "push",
+   "props": {
+    "prefix": "A day for",
+    "words": [
+     "family",
+     "rest",
+     "learning",
+     "you"
+    ]
+   }
+  },
+  {
+   "type": "justify",
+   "beats": 4,
+   "ground": "light",
+   "transition": "cut",
+   "props": {
+    "lines": [
+     "Work less",
+     "*live*",
+     "more"
+    ]
+   }
+  },
+  {
+   "type": "endcard",
+   "beats": 6,
+   "ground": "dark",
+   "transition": "zoom",
+   "props": {
+    "name": "The four-day week",
+    "tagline": "Results of the UK pilot, 2022",
+    "cta": "Read the report",
+    "url": "autonomy.work"
+   }
+  }
+ ]
+}

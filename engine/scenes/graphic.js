@@ -80,8 +80,9 @@ export const orbit = {
   draw(g, p, lt, S) {
     const P = palette(g, S), ctx = g.ctx, items = arr(p.items).slice(0, 8), n = Math.max(1, items.length);
     const cx = g.W / 2, cy = g.safe.y + g.safe.h * 0.5;
-    const R = g.portrait ? g.safe.w * 0.34 : Math.min(g.safe.w, g.safe.h) * 0.62, ry = R * (g.portrait ? 1.25 : 0.32);
-    const tag = g.u * (g.portrait ? 6 : 4.2);
+    // Portrait: a tall ellipse so tags pass above and below the center word instead of colliding.
+    const R = g.portrait ? g.safe.w * 0.3 : Math.min(g.safe.w, g.safe.h) * 0.62, ry = g.portrait ? g.safe.h * 0.36 : R * 0.32;
+    const tag = g.u * (g.portrait ? 7.2 : 4.6);
     const rot = lt * 0.45;
     const placed = items.map((it, k) => {
       const a = rot + (k / n) * TAU, z = Math.sin(a);
