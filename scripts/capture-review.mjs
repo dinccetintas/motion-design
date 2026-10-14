@@ -13,7 +13,7 @@ for (const [name, path, vp, full] of shots) {
   const p = await b.newPage({ viewport: vp });
   await p.goto('http://localhost:4100' + path, { waitUntil: 'domcontentloaded' });
   await p.waitForTimeout(4500);
-  if (name === 'studio-desktop') { await p.click('#t-film'); await p.waitForTimeout(300); await p.screenshot({ path: `.impeccable/review/studio-film-tab.png` }); await p.click('#t-review'); await p.waitForTimeout(300); await p.screenshot({ path: `.impeccable/review/studio-review-tab.png` }); await p.click('#t-scene'); }
+  if (name === 'studio-desktop') { await p.click('#t-film'); await p.waitForTimeout(300); await p.screenshot({ path: `.impeccable/review/studio-film-tab.png` }); await p.click('#t-review'); await p.waitForTimeout(300); await p.screenshot({ path: `.impeccable/review/studio-review-tab.png` }); await p.click('#t-scene'); await p.waitForTimeout(450); }
   await p.screenshot({ path: `.impeccable/review/${name}.png`, fullPage: full });
   await p.close();
 }

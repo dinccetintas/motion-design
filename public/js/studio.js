@@ -48,7 +48,12 @@ async function route() {
   renderHistory();
   chips($('#chips'), EDIT_CHIPS.map((c) => [c, c]), $('#msg'));
   $('#msg').placeholder = 'Tell the crew what to change';
-  if (S.project.spec) await setSpec(S.project.spec, { save: false });
+  if (S.project.spec) {
+    await setSpec(S.project.spec, { save: false });
+    // Open on a settled frame of the first scene, not on frame zero.
+    const s0 = player.film.timeline()[0];
+    player.seek(s0.start + Math.min(s0.dur * 0.8, s0.dur - player.film.beat * 0.5));
+  }
   S.qa = S.project.qa || null;
   refreshPanes();
   setBusy(!!S.project.busy);

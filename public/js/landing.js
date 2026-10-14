@@ -6,13 +6,14 @@ const AR = { '9:16': '9 / 16', '16:9': '16 / 9', '1:1': '1 / 1', '4:5': '4 / 5' 
 const AXES = ['hook', 'readability', 'motion', 'variety', 'brand', 'sync'];
 
 const CREW = [
-  ['Researcher', 'Reads your link, article or topic. Captures the real page, its colors, fonts and logo; finds numbers worth saying; searches the web for a topic.', 'stripe.com → accent #533AFD, 9 numbers'],
-  ['Writer', 'Finds the one idea a viewer could repeat, then writes a hook that lands in two seconds and copy short enough to read on the beat.', 'Hook: “Your idea. Cut.”'],
+  ['Researcher', 'Reads your link, article or topic. Renders the real page: screenshots, colors, fonts, logo, the numbers worth saying. Searches the web for a topic.', 'Example run: stripe.com → accent #533AFD, 9 numbers'],
+  ['Writer', 'Finds the one idea a viewer could repeat, then writes a hook that lands in two seconds and copy short enough to read on the beat.', 'Hook in the reel: “Your idea. Cut.”'],
   ['Art director', 'Chooses the world: one display face, one text face, one accent, three grounds, and the music that fits the audience.', 'Tall Poster • Drive • 9:16'],
   ['Director', 'Blocks the film on the beat grid: scene types, timing, grounds, transitions. Uses your real screenshots and only true facts.', '8 scenes • 24.5 s • 120 bpm'],
-  ['Composer', 'Composes an original score for the cut, locks every hit to a transition, and masters it to −14 LUFS.', 'Drive in A minor, kick on the grid'],
+  ['Composer', 'Composes an original score for the cut, locks every hit to a transition, and masters it to −14 LUFS.', 'Drive, kick on the grid'],
   ['Critic', 'Renders a contact sheet, probes every word on every frame, scores the cut and sends the worst three problems back.', 'Readability 6.9 → 8.4 after one pass'],
 ];
+const SHORT = { hook: 'Hook', readability: 'Read', motion: 'Motion', variety: 'Var', brand: 'Brand', sync: 'Sync' };
 
 async function api(path, opts) { const r = await fetch(path, opts); if (!r.ok) throw new Error((await r.json().catch(() => ({}))).error || r.statusText); return r.json(); }
 
@@ -32,8 +33,8 @@ for (const form of document.querySelectorAll('form.composer')) {
 for (const b of document.querySelectorAll('.try')) b.addEventListener('click', () => { const ta = $('#hero-input'); ta.value = b.dataset.try; ta.focus(); });
 
 // ---- Crew ------------------------------------------------------------------------------
-$('#crew-list').innerHTML = CREW.map(([role, what, sample]) => `
-  <li><span class="pin" aria-hidden="true"></span><div class="trim"><h3 class="role cond">${role}</h3><p>${what}</p><p class="sample">${sample}</p></div></li>`).join('');
+$('#crew-list').innerHTML = CREW.map(([role, what, sample], i) => `
+  <li><span class="no mono">${String(i + 1).padStart(2, '0')}</span><div class="trim"><h3 class="role cond">${role}</h3><p>${what}</p><p class="sample">${sample}</p></div></li>`).join('');
 
 // ---- Showcase data ------------------------------------------------------------------------
 const reel = await api('/api/showcase').catch(() => []);
@@ -41,7 +42,7 @@ const reel = await api('/api/showcase').catch(() => []);
 // ---- Measured table --------------------------------------------------------------------------
 if (reel.length) {
   const cell = (v) => `<span class="n${v < 8 ? ' low' : ''}" role="cell">${v.toFixed(1)}</span>`;
-  $('#measure-table').innerHTML = `<div class="mrow head label" role="row"><span role="columnheader">Film</span>${AXES.map((a) => `<span class="n label" role="columnheader">${a}</span>`).join('')}<span class="n label" role="columnheader">all</span></div>` +
+  $('#measure-table').innerHTML = `<div class="mrow head label" role="row"><span role="columnheader">Film</span>${AXES.map((a) => `<span class="n label" role="columnheader"><span class="full">${a}</span><span class="short" aria-hidden="true">${SHORT[a]}</span></span>`).join('')}<span class="n label" role="columnheader">all</span></div>` +
     reel.map((f) => `<div class="mrow" role="row"><span class="film" role="cell">${f.title}</span>${AXES.map((a) => cell(f.qa.scores[a])).join('')}<span class="n all" role="cell">${f.qa.overall.toFixed(1)}</span></div>`).join('') +
     `<p class="measure-note">Scores are the critic's measurements on the final cut: hook energy in the first two seconds, word size and contrast at phone size, motion between beats, variety of scenes, brand accuracy, and motion onsets against the music's beat grid.</p>`;
 }
@@ -55,25 +56,35 @@ if (hero) {
   const player = new Player(live, { audio: true, muted: true, loop: true, scale: 0.6 });
   await player.load(hero.spec);
   const thumbs = await thumbnails(hero.spec, 180);
-  const tl = player.film.timeline();
+  const hung = await thumbnails(hero.spec, 64);
+  const tl = player.film.timeline(), beat = player.film.beat;
   $('#hero-title').textContent = hero.title;
+  // Academy leader before the first frame, so the rail never runs into empty orange.
+  for (const n of [3, 2, 1]) track.insertAdjacentHTML('beforeend', `<div class="cell-col leader-col"><div class="cell-ruler"><b>${n}</b></div><div class="frame-cell leader" style="--ar:${AR[hero.spec.format] || '9 / 16'}"><span class="leader-n">${n}</span></div></div>`);
   const cells = tl.map((s, i) => {
+    const col = document.createElement('div'); col.className = 'cell-col';
+    // A numbered ruler that travels with its frame: one tick per beat of the scene.
+    col.innerHTML = `<div class="cell-ruler"><b>${String(i + 1).padStart(2, '0')}</b>${'<i></i>'.repeat(s.beats)}</div>`;
     const c = document.createElement('div'); c.className = 'frame-cell'; c.style.setProperty('--ar', AR[hero.spec.format] || '9 / 16');
-    c.appendChild(thumbs[i]); c.insertAdjacentHTML('beforeend', `<span class="num">${String(i + 1).padStart(2, '0')}</span>`);
-    track.appendChild(c); return c;
+    c.appendChild(thumbs[i]);
+    col.appendChild(c); track.appendChild(col); return c;
   });
-  // Ruler: one tick per beat.
-  $('#hero-ruler').style.setProperty('--pitch', `${Math.max(8, strip.clientWidth / (player.duration / player.film.beat))}px`);
+  // Scenes already cut hang on pins below the rail.
+  const bin = $('#hero-bin');
+  bin.innerHTML = tl.map((s, i) => `<li data-i="${i}"><span class="pin" aria-hidden="true"></span><span class="string" aria-hidden="true"></span><span class="trimcell"></span><span class="mono">${String(i + 1).padStart(2, '0')}</span></li>`).join('');
+  [...bin.children].forEach((li, i) => li.querySelector('.trimcell').appendChild(hung[i]));
   let active = -1;
   const setActive = (i) => {
     if (i === active) return;
-    if (active >= 0) { cells[active].classList.remove('active'); cells[active].replaceChildren(thumbs[active], ...[...cells[active].querySelectorAll('.num')]); cells[active].classList.add('done'); }
+    if (active >= 0) { cells[active].classList.remove('active'); live.remove(); cells[active].classList.add('done'); }
+    if (i === 0) cells.forEach((c) => c.classList.remove('done'));
     active = i;
     cells[i].classList.add('active'); cells[i].classList.remove('done');
     cells[i].prepend(live);
-    if (i === 0) cells.forEach((c) => c.classList.remove('done'));
+    [...bin.children].forEach((li, k) => { li.dataset.state = k < i ? 'cut' : k === i ? 'now' : 'next'; });
     requestAnimationFrame(() => {
-      const r = cells[i].offsetLeft + cells[i].offsetWidth / 2;
+      const col = cells[i].parentElement;
+      const r = col.offsetLeft + col.offsetWidth / 2;
       track.style.transition = 'transform 640ms cubic-bezier(0.23, 1, 0.32, 1)';
       track.style.transform = `translateX(${-r}px)`;
     });
@@ -83,6 +94,7 @@ if (hero) {
     let i = tl.findIndex((s) => t >= s.start && t < s.start + s.dur); if (i < 0) i = tl.length - 1;
     setActive(i);
     $('#hero-tc').textContent = timecode(t);
+    $('#hero-beat').textContent = `beat ${String(Math.floor(t / beat) + 1).padStart(2, '0')}`;
   });
   setActive(0);
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -109,7 +121,7 @@ for (const f of reel) {
   fig.innerHTML = `<div class="win"><canvas></canvas><span class="play-state mono">${f.spec.format}</span></div>
     <div class="meta"><h3 class="cond">${f.title}</h3><a class="tab small ghost" href="/studio?showcase=${encodeURIComponent(f.id)}">Remix</a></div>
     <p class="from">Made from ${f.from}</p>
-    <p class="verdict">${pass ? '<span class="cross" aria-hidden="true"></span>' : ''}<span class="mono">${f.qa.overall.toFixed(1)}</span><span class="dim">${pass ? 'every axis 8 or above' : 'in review'}</span></p>`;
+    <p class="verdict">${pass ? '<span class="cross" aria-hidden="true"></span><span class="ok">Approved</span>' : '<span class="ok">In review</span>'}<span class="mono">${f.qa.overall.toFixed(1)}</span><span class="dim">${pass ? 'every axis 8 or above' : ''}</span></p>`;
   grid.appendChild(fig);
   const p = new Player(fig.querySelector('canvas'), { audio: false, loop: true, scale: f.spec.format === '16:9' ? 0.5 : 0.4 });
   p.load(f.spec).then(() => p.seek(Math.min(1.5, p.duration / 3)));

@@ -46,12 +46,13 @@
     <div class="hero-rail" aria-label="A film cutting itself on the rail">
       <div class="rail-band grain-orange">
         <div class="perf-row"></div>
-        <div class="ruler-wrap"><div class="ruler" id="hero-ruler"></div><div class="flag" id="hero-flag"></div></div>
-        <div class="strip" id="hero-strip"></div>
+        <div class="strip" id="hero-strip"><div class="flag" id="hero-flag" aria-hidden="true"></div></div>
         <div class="perf-row"></div>
       </div>
+      <ol class="bin" id="hero-bin" aria-label="Scenes of the film"></ol>
       <div class="rail-meta">
         <span class="label" id="hero-title">Loading the reel</span>
+        <span class="mono dim" id="hero-beat"></span>
         <span class="mono dim" id="hero-tc">00:00:00</span>
         <button class="tab small ghost" id="hero-sound" type="button" aria-pressed="false">Sound off</button>
       </div>
@@ -65,13 +66,12 @@
 
   <section class="crew" id="crew" aria-labelledby="crew-h">
     <header class="sec-head"><h2 class="cond" id="crew-h">The crew</h2><p class="dim">Six specialists, one brief. You watch them work, and you talk to them like you would to a studio.</p></header>
-    <div class="crew-line" aria-hidden="true"></div>
-    <ol class="crew-list" id="crew-list"></ol>
+    <div class="crew-strip"><div class="perf-row"></div><ol class="crew-list" id="crew-list"></ol><div class="perf-row"></div></div>
   </section>
 
   <section class="measured" id="measured" aria-labelledby="measured-h">
     <header class="sec-head"><h2 class="cond" id="measured-h">Measured before you see it</h2><p class="dim">The critic renders a contact sheet, probes every word on every frame and scores the cut. Anything under 8 goes back to the director.</p></header>
-    <div class="measure-table" id="measure-table" role="table" aria-label="Scores of the showreel films"></div>
+    <div class="measure-sheet punched"><div class="measure-table" id="measure-table" role="table" aria-label="Scores of the showreel films"></div></div>
   </section>
 
   <section class="bench" id="bench" aria-labelledby="bench-h">

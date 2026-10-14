@@ -13,6 +13,7 @@ import { STYLES } from '../engine/styles.js';
 import { MOODS } from '../engine/audio/score.js';
 import { TRANSITION_NAMES } from '../engine/transitions.js';
 import { repair } from '../engine/schema.js';
+import { plan } from '../engine/film.js';
 import { analyze } from './qa.js';
 
 const PORT = +process.env.PORT || 4100;
@@ -40,6 +41,15 @@ async function body(req) {
   return s ? JSON.parse(s) : {};
 }
 
+/** A small still of the film for project lists. */
+async function makeThumb(id) {
+  const p = store.load(id); if (!p?.spec) return;
+  const P = plan(p.spec), s0 = P.scenes[0];
+  const out = join(store.dirOf(id), 'thumb.png');
+  await contactSheet(p.spec, out, { times: [s0 ? s0.start + s0.dur * 0.8 : 0.5], cols: 1, scale: 0.12 }).catch(() => null);
+  const fresh = store.load(id); fresh.thumb = `/data/projects/${id}/thumb.png?v=${Date.now()}`; store.save(fresh);
+}
+
 function startRun(p, message) {
   const j = job(p.id);
   if (j.busy) return false;
@@ -48,7 +58,7 @@ function startRun(p, message) {
   emit(p.id, { agent: 'studio', state: 'start', text: message, at: Date.now() });
   run(p, message, (ev) => emit(p.id, ev))
     .catch((e) => { console.error(e); emit(p.id, { agent: 'studio', state: 'error', text: friendly(e), at: Date.now() }); })
-    .finally(() => { j.busy = false; emit(p.id, { agent: 'studio', state: 'idle', at: Date.now() }); });
+    .finally(() => { j.busy = false; emit(p.id, { agent: 'studio', state: 'idle', at: Date.now() }); makeThumb(p.id).catch(() => {}); });
   return true;
 }
 const friendly = (e) => /net::|ERR_|Timeout|timeout/.test(e.message) ? `Could not load that page (${e.message.split('\n')[0].slice(0, 120)}). Check the URL or paste the text instead.` : e.message.slice(0, 300);
@@ -79,7 +89,6 @@ async function pump() {
     const fresh = store.load(id);
     const entry = { file: `/data/projects/${id}/renders/${name}`, poster: `/data/projects/${id}/renders/${name.replace('.mp4', '.png')}`, quality, format: p.spec.format, duration: r.info.duration, loudness: r.loudness, at: Date.now() };
     fresh.renders.unshift(entry);
-    fresh.thumb = entry.poster;
     store.save(fresh);
     emit(id, { agent: 'render', state: 'done', text: `Rendered ${quality} • ${r.info.duration.toFixed(1)}s • ${r.loudness?.lufs ?? '?'} LUFS`, data: entry, at: Date.now() });
   } catch (e) {
@@ -114,6 +123,7 @@ const routes = [
       const p = store.create({ title: f.title, spec: f.spec, qa: { scores: f.qa.scores, overall: f.qa.overall, issues: [] }, messages: [{ role: 'studio', text: `Remixing “${f.title}”. Tell the crew what to change.`, at: Date.now() }] });
       p.versions.push({ at: Date.now(), spec: f.spec, qa: f.qa, note: 'Remixed from the showreel' });
       store.save(p);
+      makeThumb(p.id).catch(() => {});
       return send(res, 201, { id: p.id });
     }
     const msg = String(b.message || '').trim();

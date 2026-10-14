@@ -134,3 +134,15 @@ export async function thumbnails(spec, width = 120) {
     return t;
   });
 }
+
+/** A small offscreen film for sampling frames: sampler.frame(t) paints t and returns its canvas. */
+export async function sampler(spec, height = 220) {
+  const c = document.createElement('canvas');
+  const probe = new Film(spec, c, {}, { scale: 1 });
+  const film = new Film(spec, c, {}, { scale: height / probe.H });
+  const assets = {};
+  await Promise.all(Object.entries(spec.assets || {}).map(async ([k, src]) => { assets[k] = await loadImage(src); }));
+  film.assets = assets;
+  await film.load();
+  return { film, canvas: c, aspect: film.W / film.H, frame(t) { film.seek(t); return c; } };
+}

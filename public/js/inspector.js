@@ -108,7 +108,7 @@ export function reviewPane(el, qa, { onRun, onIssue, busy }) {
   const pass = Object.values(qa.scores).every((v) => v >= 8);
   el.innerHTML = `
     <div class="overall"><span class="label">${pass ? 'Approved' : 'Notes open'}</span><span class="v">${(qa.overall ?? 0).toFixed(1)}</span></div>
-    ${AXES.map(([k, n]) => `<div class="score${qa.scores[k] < 8 ? ' low' : ''}"><span class="k">${n}</span><span class="v">${qa.scores[k].toFixed(1)}</span>${qa.scores[k] >= 8 ? '<span class="cross" aria-label="passes"></span>' : '<span aria-label="below 8"></span>'}</div>`).join('')}
+    ${AXES.map(([k, n]) => `<div class="score${qa.scores[k] < 8 ? ' low' : ''}"><span class="k">${n}</span><span class="v">${qa.scores[k].toFixed(1)}</span>${qa.scores[k] >= 8 ? '<span class="ok"><span class="cross" aria-hidden="true"></span>OK</span>' : '<span class="ok">Fix</span>'}</div>`).join('')}
     <h3 class="label">What the critic found</h3>
     ${qa.issues?.length ? `<ul class="issues">${qa.issues.slice(0, 14).map((iss, j) => `<li data-j="${j}"><b>${iss.scene != null ? 'Scene ' + (iss.scene + 1) : iss.axis}</b>${esc(iss.msg)}<span class="fix">${esc(iss.fix)}</span></li>`).join('')}</ul>` : '<p class="empty-pane">Nothing to fix.</p>'}
     ${qa.sheet ? `<h3 class="label">Contact sheet</h3><img class="sheet" src="${qa.sheet}" alt="Contact sheet: one frame per beat">` : ''}

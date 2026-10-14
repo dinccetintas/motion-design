@@ -9,6 +9,7 @@ body { overflow: hidden; }
   grid-template-areas: "bar bar bar" "crew stage insp" "crew rail insp";
 }
 .app[data-state="empty"] { grid-template-columns: 360px minmax(0, 1fr) 0; grid-template-rows: 60px minmax(0, 1fr) 0; }
+.app[data-state="empty"] .crew .composer,
 .app[data-state="empty"] .inspector, .app[data-state="empty"] .rail, .app[data-state="empty"] .viewer, .app[data-state="empty"] #render-draft, .app[data-state="empty"] #render-master { display: none; }
 .app:not([data-state="empty"]) .empty { display: none; }
 
@@ -62,7 +63,7 @@ body { overflow: hidden; }
 .composer .field { font-size: 15px; min-height: 76px; }
 .composer-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 .chips { display: flex; gap: 6px; flex-wrap: wrap; min-width: 0; }
-.chip { border: 1px solid var(--rule); background: transparent; border-radius: 999px; padding: 4px 11px; cursor: pointer; font-family: var(--f-cond); font-weight: 700; font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--white-2); transition: border-color 160ms ease, color 160ms ease, transform 160ms var(--ease-out); }
+.chip { border: 1px solid var(--rule); background: transparent; border-radius: 2px; padding: 5px 10px; cursor: pointer; font-family: var(--f-cond); font-weight: 700; font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--white-2); transition: border-color 160ms ease, color 160ms ease, transform 160ms var(--ease-out); }
 .chip:active { transform: scale(0.97); }
 @media (hover: hover) { .chip:hover { border-color: var(--orange); color: var(--orange); } }
 
@@ -113,22 +114,27 @@ body { overflow: hidden; }
 /* ---- Rail ---------------------------------------------------------------------- */
 .rail { grid-area: rail; border-top: 1px solid var(--spool); background: var(--ink); min-width: 0; padding: 12px 0 10px; }
 .rail-scroll { height: 100%; overflow-x: auto; overflow-y: hidden; padding: 0 20px; cursor: ew-resize; touch-action: pan-y; }
-.rail-inner { position: relative; height: 100%; min-width: 100%; border-radius: 4px; display: grid; grid-template-rows: auto 22px minmax(0, 1fr) auto; user-select: none; }
+.rail-inner { position: relative; height: 100%; min-width: 100%; border-radius: 4px; display: grid; grid-template-rows: auto 22px minmax(0, 1fr) auto; user-select: none; box-sizing: content-box; padding: 0 18px; }
 .rail-inner .perf-row { margin: 6px 0; }
 .rail-ruler { position: relative; color: rgba(10,10,10,.78); }
 .rail-ruler i { position: absolute; bottom: 0; width: 1.5px; height: 7px; background: currentColor; }
-.rail-ruler i.bar { height: 13px; }
+.rail-ruler i.major { height: 13px; }
 .rail-ruler b { position: absolute; bottom: 12px; font: 600 10px/1 var(--f-mono); transform: translateX(3px); }
 .rail-frames { position: relative; display: flex; align-items: stretch; padding: 4px 0; }
 .rframe { position: relative; flex: none; height: 100%; padding: 0 3px; cursor: pointer; }
-.rframe .cell { position: relative; height: 100%; border-radius: 2px; overflow: hidden; background: var(--ink); box-shadow: 0 0 0 2px var(--ink); transition: box-shadow 160ms ease; }
-.rframe canvas { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: .92; }
-.rframe .ttl { position: absolute; left: 6px; bottom: 5px; right: 6px; font-family: var(--f-cond); font-weight: 800; text-transform: uppercase; font-size: 12px; letter-spacing: 0.06em; color: var(--white); text-shadow: 0 1px 2px rgba(0,0,0,.9); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rframe { display: grid; grid-template-rows: minmax(0, 1fr) 18px; }
+.rframe .cell { position: relative; height: 100%; border-radius: 2px 2px 0 0; overflow: hidden; background: var(--ink); box-shadow: 0 0 0 2px var(--ink); transition: box-shadow 160ms ease; }
+.rframe canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+.rframe .ttl { display: flex; align-items: center; gap: 6px; background: var(--ink); color: var(--white-2); padding: 3px 6px 0; border-radius: 0 0 2px 2px; font-family: var(--f-cond); font-weight: 800; text-transform: uppercase; font-size: 11px; letter-spacing: 0.08em; line-height: 15px; white-space: nowrap; overflow: hidden; box-shadow: 0 0 0 2px var(--ink); }
+.rframe .ttl span { overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.rframe .mark { flex: none; margin-left: auto; width: 10px; height: 10px; }
+.rframe.sel .ttl { color: var(--orange); }
 .rframe .no { position: absolute; left: 5px; top: 5px; font: 600 10px/1 var(--f-mono); background: rgba(10,10,10,.85); color: var(--white); padding: 2px 4px; border-radius: 2px; }
 .rframe.sel .cell { box-shadow: 0 0 0 2px var(--ink), 0 0 0 4px var(--white); }
-.rframe.ok .cell::after { content: ''; position: absolute; top: 4px; right: 4px; width: 14px; height: 14px; background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'><path d='M3 3.5 L17 16.5 M16.5 3 L3.5 17' stroke='%23F4F1EA' stroke-width='3.4' stroke-linecap='round' fill='none'/></svg>") center / contain no-repeat; filter: drop-shadow(0 1px 1px rgba(0,0,0,.8)); }
-.rframe.issue .cell::after { content: ''; position: absolute; top: 0; right: 0; width: 18px; height: 18px; background: var(--orange); clip-path: polygon(0 0, 100% 0, 100% 100%); box-shadow: none; }
-.playhead { position: absolute; top: 0; bottom: 0; left: 0; width: 0; pointer-events: none; will-change: transform; }
+/* The critic's marks sit on the label strip, never over the picture: grease cross = approved, orange tab = flagged. */
+.rframe.ok .mark { background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'><path d='M3 3.5 L17 16.5 M16.5 3 L3.5 17' stroke='%23F4F1EA' stroke-width='3.6' stroke-linecap='round' fill='none'/></svg>") center / contain no-repeat; opacity: .8; }
+.rframe.issue .mark { background: var(--orange); clip-path: polygon(0 0, 100% 0, 100% 100%); }
+.playhead { position: absolute; top: 0; bottom: 0; left: 18px; width: 0; pointer-events: none; will-change: transform; }
 .playhead .flag { position: absolute; top: 2px; left: -11px; width: 22px; height: 30px; background-color: var(--ink); background-image: none; }
 .playhead i { position: absolute; top: 28px; bottom: 0; left: -1px; width: 2px; background: var(--ink); }
 
@@ -157,7 +163,7 @@ body { overflow: hidden; }
 .style-opt { text-align: left; border: 1.5px solid var(--spool); border-radius: var(--r); background: var(--char); padding: 10px; cursor: pointer; display: grid; gap: 6px; transition: border-color 160ms ease, transform 160ms var(--ease-out); }
 .style-opt:active { transform: scale(0.98); }
 .style-opt[aria-pressed="true"] { border-color: var(--orange); }
-.style-opt .sample { font-size: 22px; line-height: 1; color: var(--white); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.style-opt .sample { font-size: 19px; line-height: 1.02; color: var(--white); overflow-wrap: anywhere; }
 .style-opt .nm { font-size: 11px; color: var(--dim); font-family: var(--f-cond); font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
 .style-opt .pal { display: flex; gap: 3px; }
 .style-opt .pal i { width: 14px; height: 6px; border-radius: 1px; }
@@ -170,7 +176,8 @@ body { overflow: hidden; }
 .colors label { display: grid; gap: 4px; font: 500 11px/1.2 var(--f-mono); color: var(--dim); }
 .colors input[type=color] { width: 100%; height: 38px; border: 1.5px solid var(--rule); border-radius: var(--r); background: var(--char); padding: 3px; cursor: pointer; }
 
-.score { display: grid; grid-template-columns: minmax(0, 1fr) auto 18px; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--spool); }
+.score .ok { display: inline-flex; align-items: center; gap: 4px; font-family: var(--f-cond); font-weight: 800; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--dim); }
+.score { display: grid; grid-template-columns: minmax(0, 1fr) auto 52px; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--spool); }
 .score .k { font-family: var(--f-cond); font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; font-size: 16px; }
 .score .v { font: 600 20px/1 var(--f-mono); font-variant-numeric: tabular-nums; }
 .score.low .v { color: var(--orange); }
