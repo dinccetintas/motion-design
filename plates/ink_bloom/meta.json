@@ -1,0 +1,12 @@
+{
+  "id": "ink_bloom",
+  "fps": 30,
+  "frames": 301,
+  "duration": 10.033333333333333,
+  "in": 0,
+  "out": 10.041667,
+  "srcWidth": 1912,
+  "srcHeight": 1080,
+  "model": "kling3_0 pro",
+  "job": "12074f43-eb6f-4434-8b8e-bdd4ab7094bf"
+}

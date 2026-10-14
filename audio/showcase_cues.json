@@ -1,0 +1,414 @@
+[
+ {
+  "t": 0.1,
+  "sfx": "dot"
+ },
+ {
+  "t": 0.5,
+  "sfx": "tick"
+ },
+ {
+  "t": 1.0,
+  "sfx": "tick"
+ },
+ {
+  "t": 1.5,
+  "sfx": "tick"
+ },
+ {
+  "t": 2.0,
+  "sfx": "tick"
+ },
+ {
+  "t": 2.0,
+  "sfx": "strobe"
+ },
+ {
+  "t": 2.08,
+  "sfx": "strobe"
+ },
+ {
+  "t": 2.16,
+  "sfx": "strobe"
+ },
+ {
+  "t": 2.24,
+  "sfx": "strobe"
+ },
+ {
+  "t": 2.32,
+  "sfx": "strobe"
+ },
+ {
+  "t": 2.4,
+  "sfx": "strobe"
+ },
+ {
+  "t": 2.5,
+  "sfx": "tick"
+ },
+ {
+  "t": 3.0,
+  "sfx": "tick"
+ },
+ {
+  "t": 3.5,
+  "sfx": "tick"
+ },
+ {
+  "t": 4.0,
+  "sfx": "tick"
+ },
+ {
+  "t": 4.0,
+  "sfx": "flash"
+ },
+ {
+  "t": 4.0,
+  "sfx": "letter"
+ },
+ {
+  "t": 4.04,
+  "sfx": "letter"
+ },
+ {
+  "t": 4.08,
+  "sfx": "letter"
+ },
+ {
+  "t": 4.12,
+  "sfx": "letter"
+ },
+ {
+  "t": 4.16,
+  "sfx": "letter"
+ },
+ {
+  "t": 4.2,
+  "sfx": "letter"
+ },
+ {
+  "t": 4.5,
+  "sfx": "tick"
+ },
+ {
+  "t": 5.0,
+  "sfx": "tick"
+ },
+ {
+  "t": 5.5,
+  "sfx": "tick"
+ },
+ {
+  "t": 6.0,
+  "sfx": "card"
+ },
+ {
+  "t": 7.5,
+  "sfx": "iris"
+ },
+ {
+  "t": 9.0,
+  "sfx": "patch-flip"
+ },
+ {
+  "t": 9.0,
+  "sfx": "label"
+ },
+ {
+  "t": 10.0,
+  "sfx": "patch-flip"
+ },
+ {
+  "t": 11.0,
+  "sfx": "patch-flip"
+ },
+ {
+  "t": 11.0,
+  "sfx": "macro-cut"
+ },
+ {
+  "t": 13.0,
+  "sfx": "stamp"
+ },
+ {
+  "t": 14.0,
+  "sfx": "stamp"
+ },
+ {
+  "t": 15.0,
+  "sfx": "stamp"
+ },
+ {
+  "t": 15.0,
+  "sfx": "darken"
+ },
+ {
+  "t": 16.0,
+  "sfx": "streak"
+ },
+ {
+  "t": 16.5,
+  "sfx": "streak"
+ },
+ {
+  "t": 17.0,
+  "sfx": "streak"
+ },
+ {
+  "t": 17.5,
+  "sfx": "streak"
+ },
+ {
+  "t": 18.0,
+  "sfx": "streak"
+ },
+ {
+  "t": 18.0,
+  "sfx": "burst-cut"
+ },
+ {
+  "t": 18.25,
+  "sfx": "burst-cut"
+ },
+ {
+  "t": 18.5,
+  "sfx": "streak"
+ },
+ {
+  "t": 18.5,
+  "sfx": "burst-cut"
+ },
+ {
+  "t": 18.75,
+  "sfx": "burst-cut"
+ },
+ {
+  "t": 19.0,
+  "sfx": "streak"
+ },
+ {
+  "t": 19.0,
+  "sfx": "burst-cut"
+ },
+ {
+  "t": 19.25,
+  "sfx": "burst-cut"
+ },
+ {
+  "t": 19.5,
+  "sfx": "streak"
+ },
+ {
+  "t": 19.5,
+  "sfx": "burst-cut"
+ },
+ {
+  "t": 19.75,
+  "sfx": "burst-cut"
+ },
+ {
+  "t": 20.0,
+  "sfx": "streak"
+ },
+ {
+  "t": 20.0,
+  "sfx": "counter"
+ },
+ {
+  "t": 20.5,
+  "sfx": "streak"
+ },
+ {
+  "t": 20.5,
+  "sfx": "counter"
+ },
+ {
+  "t": 21.0,
+  "sfx": "streak"
+ },
+ {
+  "t": 21.0,
+  "sfx": "counter"
+ },
+ {
+  "t": 21.5,
+  "sfx": "streak"
+ },
+ {
+  "t": 21.5,
+  "sfx": "counter"
+ },
+ {
+  "t": 22.0,
+  "sfx": "streak"
+ },
+ {
+  "t": 22.0,
+  "sfx": "counter"
+ },
+ {
+  "t": 22.0,
+  "sfx": "label"
+ },
+ {
+  "t": 22.5,
+  "sfx": "streak"
+ },
+ {
+  "t": 22.5,
+  "sfx": "counter"
+ },
+ {
+  "t": 23.0,
+  "sfx": "streak"
+ },
+ {
+  "t": 23.5,
+  "sfx": "streak"
+ },
+ {
+  "t": 23.5,
+  "sfx": "bloom"
+ },
+ {
+  "t": 24.5,
+  "sfx": "readout"
+ },
+ {
+  "t": 25.0,
+  "sfx": "readout"
+ },
+ {
+  "t": 25.5,
+  "sfx": "readout"
+ },
+ {
+  "t": 26.0,
+  "sfx": "readout"
+ },
+ {
+  "t": 26.0,
+  "sfx": "scribble"
+ },
+ {
+  "t": 26.5,
+  "sfx": "readout"
+ },
+ {
+  "t": 27.0,
+  "sfx": "readout"
+ },
+ {
+  "t": 27.0,
+  "sfx": "snap-off"
+ },
+ {
+  "t": 27.5,
+  "sfx": "readout"
+ },
+ {
+  "t": 28.0,
+  "sfx": "sliver"
+ },
+ {
+  "t": 28.12,
+  "sfx": "sliver"
+ },
+ {
+  "t": 28.24,
+  "sfx": "sliver"
+ },
+ {
+  "t": 30.0,
+  "sfx": "card"
+ },
+ {
+  "t": 31.0,
+  "sfx": "card-out"
+ },
+ {
+  "t": 31.5,
+  "sfx": "to-sun"
+ },
+ {
+  "t": 32.0,
+  "sfx": "sun"
+ },
+ {
+  "t": 33.0,
+  "sfx": "hue"
+ },
+ {
+  "t": 33.25,
+  "sfx": "hue"
+ },
+ {
+  "t": 33.5,
+  "sfx": "hue"
+ },
+ {
+  "t": 33.75,
+  "sfx": "hue"
+ },
+ {
+  "t": 34.0,
+  "sfx": "full-colour"
+ },
+ {
+  "t": 35.0,
+  "sfx": "quote-1"
+ },
+ {
+  "t": 37.0,
+  "sfx": "quote-2"
+ },
+ {
+  "t": 38.0,
+  "sfx": "sky-cut"
+ },
+ {
+  "t": 39.5,
+  "sfx": "shrink"
+ },
+ {
+  "t": 40.0,
+  "sfx": "land"
+ },
+ {
+  "t": 40.05,
+  "sfx": "paper"
+ },
+ {
+  "t": 41.0,
+  "sfx": "deal"
+ },
+ {
+  "t": 41.5,
+  "sfx": "deal"
+ },
+ {
+  "t": 42.0,
+  "sfx": "deal"
+ },
+ {
+  "t": 42.5,
+  "sfx": "deal"
+ },
+ {
+  "t": 43.0,
+  "sfx": "deal"
+ },
+ {
+  "t": 44.0,
+  "sfx": "lockup"
+ },
+ {
+  "t": 44.5,
+  "sfx": "line"
+ },
+ {
+  "t": 45.0,
+  "sfx": "dot"
+ }
+]

@@ -33,6 +33,32 @@ claude --model claude-opus-5-5  # then /model → effort: xhigh for new videos, 
 
 API keys (e.g. `ELEVENLABS_API_KEY`) go in `.env`, never in a prompt.
 
+## MATTER: the Higgsfield showcase (showcase/)
+
+A 48 s film where one circle travels through six materials. Higgsfield paints the materials
+(style frame → Kling image-to-video), code paints everything exact. Read `docs/system.md`,
+`docs/reference_analysis.md` and `docs/matter_shotlist.md`; the repeatable procedure is the
+`higgsfield-reel` skill in `.claude/skills/`.
+
+```bash
+node tools/plates.mjs fetch && node tools/plates.mjs frames     # plates/plates.json -> plates/<id>/%05d.jpg
+node tools/sheet.mjs showcase/index.html 1920 1080 0 48 0.5 out/sheet.png 12   # critique loop
+python3 showcase/sound.py                                       # audio/showcase_track.wav + cues
+node render.mjs --page showcase/index.html --fps 30 --dur 48 --sub 4 --w 1920 --h 1080 --out out/matter_16x9_silent.mp4
+node render.mjs --page "showcase/index.html?v=1" --fps 30 --dur 48 --sub 4 --w 1080 --h 1920 --out out/matter_9x16_silent.mp4
+tools/finish_showcase.sh                                        # -14 LUFS mux + review sheets
+```
+
+| File | What it is |
+|---|---|
+| `showcase/lib.js` | Beat grid (120 BPM), springs, palette, condensed-caps type helpers |
+| `showcase/fx.js` | Ordered dither, grain, chromatic aberration, scanlines, duotone, paper, thermal passes |
+| `showcase/plates.js` | Frame-accurate plate playback (`drawPlate`) from JPEG sequences |
+| `showcase/scenes_a.js`, `scenes_b.js` | INK, CLAY, FIRE / HEAT, PAINT, DESK |
+| `showcase/sound.py` | The score and SFX cues on the same grid |
+| `tools/plates.mjs` | Fetch Higgsfield clips, extract frames, write `plates/manifest.js` |
+| `plates/plates.json` | Every paid job: id, model, prompt, cost, verdict (never pay twice) |
+
 ## Showreel pipeline
 
 ```bash

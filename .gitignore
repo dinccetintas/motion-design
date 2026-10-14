@@ -2,3 +2,8 @@ node_modules/
 out/
 .env
 audio/*.wav
+plates/*/src.mp4
+plates/*/*.jpg
+plates/frames/*.png
+plates/frames/
+plates/_canary/

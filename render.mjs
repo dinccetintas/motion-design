@@ -12,7 +12,7 @@ const W = arg('w', 1080), H = arg('h', 1920), FROM = arg('from', 0);
 const PAGE = sarg('page', 'index.html'), OUT = sarg('out', 'out/silent.mp4');
 mkdirSync('out', { recursive: true });
 
-const browser = await chromium.launch({ args: ['--enable-unsafe-swiftshader'] });
+const browser = await chromium.launch({ args: ['--enable-unsafe-swiftshader', '--allow-file-access-from-files'] });
 const page = await browser.newPage({ viewport: { width: W, height: H }, deviceScaleFactor: 1 });
 await page.goto('file://' + process.cwd() + '/' + PAGE);
 await page.evaluate(() => document.fonts.ready);

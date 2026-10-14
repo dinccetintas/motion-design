@@ -1,0 +1,12 @@
+{
+  "id": "thermal_runner",
+  "fps": 30,
+  "frames": 151,
+  "duration": 5.033333333333333,
+  "in": 0,
+  "out": 5.041667,
+  "srcWidth": 1912,
+  "srcHeight": 1080,
+  "model": "kling3_0 pro",
+  "job": "c5127b5d-1677-48fb-a160-06f16b2ea5d7"
+}

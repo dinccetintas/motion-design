@@ -8,7 +8,7 @@ import { join } from 'node:path';
 
 const [page, w, h, from, to, step, out, cols = '6'] = process.argv.slice(2);
 const dir = mkdtempSync(join(tmpdir(), 'sheet-'));
-const browser = await chromium.launch({ args: ['--enable-unsafe-swiftshader'] });
+const browser = await chromium.launch({ args: ['--enable-unsafe-swiftshader', '--allow-file-access-from-files'] });
 const p = await browser.newPage({ viewport: { width: +w, height: +h } });
 const errors = [];
 p.on('pageerror', (e) => errors.push(String(e)));

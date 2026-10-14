@@ -1,0 +1,192 @@
+{
+ "fps": 30,
+ "note": "Higgsfield assets for MATTER. Style frames: gpt_image_2_5 high/2k 16:9 (2.75 cr each). Plates: kling3_0 pro, sound off, start_image = style-frame job id. Every paid job is listed with its cost so a re-run never pays twice.",
+ "style_frames": [
+  {
+   "id": "ink_bloom",
+   "job": "ea266de4-2f62-4f23-9a3d-82f8023fe52a",
+   "cost": 2.75,
+   "verdict": "accepted"
+  },
+  {
+   "id": "ink_macro",
+   "job": "6d73fcb0-2fe3-4bd1-8dc0-ff446b060f14",
+   "cost": 2.75,
+   "verdict": "accepted"
+  },
+  {
+   "id": "clay_hands",
+   "job": "4b53ef4d-a0f4-4dc6-a433-ac79cd840924",
+   "cost": 2.75,
+   "verdict": "accepted"
+  },
+  {
+   "id": "clay_macro",
+   "job": "f05057ec-9ef3-40bd-87d5-a60c7e3e51c2",
+   "cost": 2.75,
+   "verdict": "accepted"
+  },
+  {
+   "id": "fire_wool",
+   "job": "b860523d-919e-45ce-829b-313429de505b",
+   "cost": 2.75,
+   "verdict": "accepted"
+  },
+  {
+   "id": "fire_skier",
+   "job": "f756a1e4-f3ef-4d61-a51f-d8b8b88fca74",
+   "cost": 2.75,
+   "verdict": "accepted"
+  },
+  {
+   "id": "thermal_dancer",
+   "job": "a65f63ee-2b0b-4048-bbc4-0b0048916ef5",
+   "cost": 2.75,
+   "verdict": "accepted"
+  },
+  {
+   "id": "thermal_hands",
+   "job": "75be3287-4f67-46be-8d9d-568b0b5b1ef1",
+   "cost": 2.75,
+   "verdict": "accepted"
+  },
+  {
+   "id": "paint_city",
+   "job": "c1590685-f22a-4ca7-b1cb-6c4ffe580e8e",
+   "cost": 2.75,
+   "verdict": "accepted"
+  },
+  {
+   "id": "paint_sky",
+   "job": "91fab404-96d4-483e-b2b8-155204405c1a",
+   "cost": 2.75,
+   "verdict": "accepted"
+  },
+  {
+   "id": "desk",
+   "job": "a67aed43-ded7-46d4-922f-3dcf38a049dc",
+   "cost": 2.75,
+   "verdict": "accepted"
+  },
+  {
+   "id": "thermal_runner",
+   "job": "409bdaba-2552-45d6-bac2-625ea86efbb8",
+   "cost": 2.75,
+   "verdict": "accepted"
+  }
+ ],
+ "plates": [
+  {
+   "id": "ink_bloom",
+   "job": "12074f43-eb6f-4434-8b8e-bdd4ab7094bf",
+   "url": "https://d8j0ntlcm91z4.cloudfront.net/user_2zjoMOKcnGaLGoCw20hTJ6QbBqm/hf_20261014_201925_12074f43-eb6f-4434-8b8e-bdd4ab7094bf.mp4",
+   "model": "kling3_0 pro",
+   "cost": 15,
+   "scale": 1920,
+   "verdict": "accepted"
+  },
+  {
+   "id": "clay_hands",
+   "job": "b73c2104-c2bc-42d8-98db-73c4396ce601",
+   "url": "https://d8j0ntlcm91z4.cloudfront.net/user_2zjoMOKcnGaLGoCw20hTJ6QbBqm/hf_20261014_201923_b73c2104-c2bc-42d8-98db-73c4396ce601.mp4",
+   "model": "kling3_0 pro",
+   "cost": 15,
+   "scale": 1920,
+   "verdict": "accepted"
+  },
+  {
+   "id": "ink_macro",
+   "job": "3dc09a42-97d7-4ac1-b3aa-0ea78bfb2f0d",
+   "url": "https://d8j0ntlcm91z4.cloudfront.net/user_2zjoMOKcnGaLGoCw20hTJ6QbBqm/hf_20261014_202511_3dc09a42-97d7-4ac1-b3aa-0ea78bfb2f0d.mp4",
+   "model": "kling3_0 pro",
+   "cost": 7.5,
+   "scale": 1920,
+   "verdict": "accepted"
+  },
+  {
+   "id": "clay_macro",
+   "job": "1a14e2ad-4313-48f9-a515-c0bfc6c40a2f",
+   "url": "https://d8j0ntlcm91z4.cloudfront.net/user_2zjoMOKcnGaLGoCw20hTJ6QbBqm/hf_20261014_202512_1a14e2ad-4313-48f9-a515-c0bfc6c40a2f.mp4",
+   "model": "kling3_0 pro",
+   "cost": 7.5,
+   "scale": 1920,
+   "verdict": "accepted"
+  },
+  {
+   "id": "fire_wool",
+   "job": "5af17840-7499-40ee-939d-d0f9a3ca56f8",
+   "url": "https://d8j0ntlcm91z4.cloudfront.net/user_2zjoMOKcnGaLGoCw20hTJ6QbBqm/hf_20261014_202511_5af17840-7499-40ee-939d-d0f9a3ca56f8.mp4",
+   "model": "kling3_0 pro",
+   "cost": 15,
+   "scale": 1920,
+   "verdict": "accepted"
+  },
+  {
+   "id": "fire_skier",
+   "job": "239e3b8b-74b1-4aa1-80e8-01ae85d93891",
+   "url": "https://d8j0ntlcm91z4.cloudfront.net/user_2zjoMOKcnGaLGoCw20hTJ6QbBqm/hf_20261014_202511_239e3b8b-74b1-4aa1-80e8-01ae85d93891.mp4",
+   "model": "kling3_0 pro",
+   "cost": 7.5,
+   "scale": 1920,
+   "verdict": "accepted"
+  },
+  {
+   "id": "thermal_hands",
+   "job": "9db9681b-5fc4-4a88-b1a9-d2a315230cea",
+   "url": "https://d8j0ntlcm91z4.cloudfront.net/user_2zjoMOKcnGaLGoCw20hTJ6QbBqm/hf_20261014_202511_9db9681b-5fc4-4a88-b1a9-d2a315230cea.mp4",
+   "model": "kling3_0 pro",
+   "cost": 7.5,
+   "scale": 1920,
+   "verdict": "accepted"
+  },
+  {
+   "id": "paint_sky",
+   "job": "09832b1a-b710-4c3f-bf35-1928c20624f7",
+   "url": "https://d8j0ntlcm91z4.cloudfront.net/user_2zjoMOKcnGaLGoCw20hTJ6QbBqm/hf_20261014_202512_09832b1a-b710-4c3f-bf35-1928c20624f7.mp4",
+   "model": "kling3_0 pro",
+   "cost": 7.5,
+   "scale": 1920,
+   "verdict": "accepted"
+  },
+  {
+   "id": "desk",
+   "job": "8147530d-4215-4773-aa13-140c0ed31b1d",
+   "url": "https://d8j0ntlcm91z4.cloudfront.net/user_2zjoMOKcnGaLGoCw20hTJ6QbBqm/hf_20261014_202511_8147530d-4215-4773-aa13-140c0ed31b1d.mp4",
+   "model": "kling3_0 pro",
+   "cost": 7.5,
+   "scale": 1920,
+   "verdict": "accepted"
+  },
+  {
+   "id": "paint_city",
+   "job": "050f096f-11a1-440c-9611-0b5d15f0e902",
+   "url": "https://d8j0ntlcm91z4.cloudfront.net/user_2zjoMOKcnGaLGoCw20hTJ6QbBqm/hf_20261014_202535_050f096f-11a1-440c-9611-0b5d15f0e902.mp4",
+   "model": "kling3_0 pro",
+   "cost": 15,
+   "scale": 1920,
+   "verdict": "accepted"
+  },
+  {
+   "id": "thermal_runner",
+   "job": "c5127b5d-1677-48fb-a160-06f16b2ea5d7",
+   "url": "https://d8j0ntlcm91z4.cloudfront.net/user_2zjoMOKcnGaLGoCw20hTJ6QbBqm/hf_20261014_203206_c5127b5d-1677-48fb-a160-06f16b2ea5d7.mp4",
+   "model": "kling3_0 pro",
+   "cost": 7.5,
+   "scale": 1920,
+   "verdict": "accepted"
+  }
+ ],
+ "rejected": [
+  {
+   "id": "thermal_dancer",
+   "job": "d5248866-2d36-4b60-a1d3-8777deb6e5cb",
+   "cost": 7.5,
+   "verdict": "nsfw flag from the video model; replaced by thermal_runner"
+  }
+ ],
+ "spend": {
+  "credits_spent": 153.0,
+  "credits_at_start": 260,
+  "credits_left_at_render": 114.5
+ }
+}
