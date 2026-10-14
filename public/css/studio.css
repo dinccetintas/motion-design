@@ -9,7 +9,7 @@ body { overflow: hidden; }
   grid-template-areas: "bar bar bar" "crew stage insp" "crew rail insp";
 }
 .app[data-state="empty"] { grid-template-columns: 360px minmax(0, 1fr) 0; grid-template-rows: 60px minmax(0, 1fr) 0; }
-.app[data-state="empty"] .inspector, .app[data-state="empty"] .rail, .app[data-state="empty"] .viewer { display: none; }
+.app[data-state="empty"] .inspector, .app[data-state="empty"] .rail, .app[data-state="empty"] .viewer, .app[data-state="empty"] #render-draft, .app[data-state="empty"] #render-master { display: none; }
 .app:not([data-state="empty"]) .empty { display: none; }
 
 /* ---- Bar ---------------------------------------------------------------------- */
@@ -69,8 +69,8 @@ body { overflow: hidden; }
 /* ---- Stage --------------------------------------------------------------------- */
 .stage { grid-area: stage; min-width: 0; min-height: 0; display: grid; background: #0D0D0D; }
 .viewer { display: grid; grid-template-rows: minmax(0, 1fr) auto; min-height: 0; }
-.screen { position: relative; display: grid; place-items: center; min-height: 0; padding: 24px; }
-.screen canvas { max-width: 100%; max-height: 100%; width: auto; height: auto; border-radius: 3px; box-shadow: 0 0 0 1px var(--spool), 0 24px 60px -24px rgba(0,0,0,.8); background: var(--ink); cursor: pointer; }
+.screen { position: relative; display: grid; place-items: center; min-height: 0; padding: 24px; overflow: hidden; }
+.screen canvas { border-radius: 3px; box-shadow: 0 0 0 1px var(--spool), 0 24px 60px -24px rgba(0,0,0,.8); background: var(--ink); cursor: pointer; }
 .screen-wait[hidden] { display: none; }
 .screen-wait { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: 14px; background: rgba(13,13,13,.72); }
 .screen-wait .flag { width: 28px; height: 38px; animation: nod 1.1s var(--ease-in-out) infinite; transform-origin: 50% 0; }
@@ -106,6 +106,7 @@ body { overflow: hidden; }
 .recent-list a { display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 10px; align-items: center; padding: 8px; border: 1px solid var(--spool); border-radius: 3px; text-decoration: none; transition: border-color 160ms ease; }
 @media (hover: hover) { .recent-list a:hover { border-color: var(--orange); } }
 .recent-list img, .recent-list .ph { width: 44px; height: 44px; object-fit: cover; border-radius: 2px; background: var(--char); }
+.recent-list a > span { display: grid; min-width: 0; }
 .recent-list .t { font-family: var(--f-cond); font-weight: 800; text-transform: uppercase; font-size: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .recent-list .s { font-size: 12px; color: var(--dim); }
 
@@ -180,7 +181,8 @@ body { overflow: hidden; }
 .issues li b { font-family: var(--f-cond); font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; font-size: 12px; color: var(--orange); margin-right: 6px; }
 .issues li .fix { display: block; color: var(--dim); margin-top: 2px; }
 .pane img.sheet { width: 100%; border-radius: 2px; outline: 1px solid var(--spool); margin-top: 10px; }
-.takes { list-style: none; margin: 0; padding: 0 0 0 14px; border-left: 2px solid var(--spool); display: grid; gap: 10px; }
+.takes { position: relative; list-style: none; margin: 0; padding: 0 0 0 16px; display: grid; gap: 10px; }
+.takes::before { content: ''; position: absolute; left: 0; top: 4px; bottom: 4px; width: 2px; background: var(--spool); } /* the string the takes hang from */
 .takes li { position: relative; }
 .takes li .pin { position: absolute; left: -20px; top: 12px; }
 .takes button { width: 100%; text-align: left; border: 1.5px solid var(--spool); background: var(--char); border-radius: 3px; padding: 9px 11px; cursor: pointer; display: grid; gap: 3px; transition: border-color 160ms ease; }
@@ -205,7 +207,7 @@ body { overflow: hidden; }
   body { overflow: auto; }
   .app, .app[data-state="empty"] { display: flex; flex-direction: column; height: auto; min-height: 100svh; }
   .bar { position: sticky; top: 0; z-index: 10; height: 56px; padding: 0 12px; gap: 12px; }
-  .bar .wordmark .name, .slate .label, #new-film { display: none; }
+  .bar .wordmark .name, #new-film { display: none; }
   .slate { padding-left: 12px; }
   .slate-title { font-size: 18px; }
   .crew-state #crew-state-text { display: none; }

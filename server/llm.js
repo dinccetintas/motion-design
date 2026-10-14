@@ -37,6 +37,18 @@ export async function callJSON(o) {
     fallbacks: 'default',
   };
   if (o.tools) params.tools = o.tools;
+  try { return await run(c, params, o); }
+  catch (e) {
+    // If the API rejects the schema (too large for constrained decoding), ask for JSON in prose instead.
+    if (!(e instanceof Anthropic.BadRequestError) || !o.schema || !/schema|format|grammar/i.test(e.message)) throw e;
+    const p2 = { ...params, output_config: { effort: params.output_config.effort } };
+    const note = `\n\nReturn only a JSON object (no prose, no code fences) that validates against this JSON Schema:\n${JSON.stringify(o.schema)}`;
+    p2.messages = [{ role: 'user', content: typeof o.content === 'string' ? o.content + note : [...o.content, { type: 'text', text: note }] }];
+    return run(c, p2, o);
+  }
+}
+
+async function run(c, params, o) {
   let messages = params.messages, final = null;
   // pause_turn can happen on long server-tool (web search) turns: resume until done.
   for (let round = 0; round < 4; round++) {

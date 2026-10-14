@@ -205,6 +205,17 @@ function selectScene(i, seek) {
   showTab('scene');
 }
 
+// Fit the film into the stage at its aspect ratio (percent max-height can't resolve in a grid track).
+function fitCanvas() {
+  const sc = $('#screen'), c = $('#film');
+  if (!player.film) return;
+  const pad = innerWidth < 900 ? 24 : 48, w = sc.clientWidth - pad, h = sc.clientHeight - pad;
+  const ar = player.film.W / player.film.H, cw = Math.max(40, Math.min(w, h * ar));
+  c.style.width = cw + 'px'; c.style.height = cw / ar + 'px';
+}
+new ResizeObserver(fitCanvas).observe($('#screen'));
+player.addEventListener('load', fitCanvas);
+
 // Player <-> UI
 player.addEventListener('time', (e) => {
   const t = e.detail;

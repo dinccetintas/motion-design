@@ -64,7 +64,7 @@ export const STYLES = {
       text: F('Familjen Grotesk', { weight: 600 }),
       mono: F('JetBrains Mono', { weight: 500 }),
     },
-    palette: { dark: '#141414', light: '#F1ECE3', accent: '#E8222B' },
+    palette: { dark: '#141414', light: '#F1ECE3', accent: '#D91E27' },
     accentStyle: 'color', radius: 0, motion: { type: 'snap', obj: 'heavy' }, camera: 0.03, grain: 0.07,
   },
   luxe: {
@@ -112,6 +112,12 @@ export const STYLES = {
 /** Every font family a style can reference, for preloading. */
 export const FAMILIES = [...new Set(Object.values(STYLES).flatMap((s) => Object.values(s.fonts).map((f) => f.family)))];
 
+/** The palette ink that reads best on bg; pure white or black when neither reaches 4.5:1. */
+function readableInk(bg, ...inks) {
+  const best = bestOn(bg, ...inks);
+  return contrast(best, bg) >= 4.5 ? best : bestOn(bg, '#FFFFFF', '#0A0A0A');
+}
+
 /**
  * Resolve a style id plus optional brand overrides into a concrete style.
  * Guarantees readable ink on every ground (WCAG >= 4.5 for text where possible).
@@ -128,9 +134,9 @@ export function resolveStyle(id, over = {}) {
   if (luminance(p.light) < 0.35) p.light = mix(p.light, '#ffffff', 0.85);
   if (luminance(p.dark) > 0.25) p.dark = mix(p.dark, '#000000', 0.75);
   s.grounds = {
-    dark: { bg: p.dark, ink: p.light, accent: contrast(p.accent, p.dark) >= 3 ? p.accent : mix(p.accent, p.light, 0.5) },
-    light: { bg: p.light, ink: p.dark, accent: contrast(p.accent, p.light) >= 3 ? p.accent : mix(p.accent, p.dark, 0.45) },
-    accent: { bg: p.accent, ink: bestOn(p.accent, p.dark, p.light), accent: bestOn(p.accent, p.light, p.dark) },
+    dark: { bg: p.dark, ink: readableInk(p.dark, p.light), accent: contrast(p.accent, p.dark) >= 3 ? p.accent : mix(p.accent, p.light, 0.5) },
+    light: { bg: p.light, ink: readableInk(p.light, p.dark), accent: contrast(p.accent, p.light) >= 3 ? p.accent : mix(p.accent, p.dark, 0.45) },
+    accent: { bg: p.accent, ink: readableInk(p.accent, p.dark, p.light), accent: bestOn(p.accent, p.light, p.dark) },
   };
   // On accent grounds the "accent" word needs a different treatment than color.
   s.grounds.accent.accent = s.grounds.accent.ink;

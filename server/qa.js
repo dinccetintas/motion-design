@@ -79,7 +79,7 @@ export async function analyze(spec, opts = {}) {
     }
     // Reading speed: ~3.3 words/sec for display copy.
     const words = sceneWords(sc), need = words / 3.3 + 0.4;
-    if (need > sc.dur) { readPen += 1; add('major', 'readability', si, `${words} words in ${sc.dur.toFixed(1)}s is too fast to read.`, `Cut to ${Math.floor((sc.dur - 0.4) * 3.3)} words or give the scene ${Math.ceil(need / P.beat)} beats.`); }
+    if (need > sc.dur) { readPen += 1.6; add('major', 'readability', si, `${words} words in ${sc.dur.toFixed(1)}s is too fast to read.`, `Cut to ${Math.floor((sc.dur - 0.4) * 3.3)} words or give the scene ${Math.ceil(need / P.beat)} beats.`); }
   });
   const readability = clamp10(10 - readPen);
 

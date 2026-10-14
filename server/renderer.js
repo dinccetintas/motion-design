@@ -21,9 +21,17 @@ export async function origin() {
   return base;
 }
 
+/** Shared Chromium, relaunched if it ever disconnects (crash, OOM, killed). */
 export async function browser() {
-  if (!browserP) browserP = chromium.launch({ args: ['--disable-gpu-vsync', '--font-render-hinting=none'] });
-  return browserP;
+  if (browserP) {
+    const b = await browserP.catch(() => null);
+    if (b && b.isConnected()) return b;
+    browserP = null;
+  }
+  browserP = chromium.launch({ args: ['--disable-gpu-vsync', '--font-render-hinting=none'] });
+  const b = await browserP;
+  b.on('disconnected', () => { browserP = null; });
+  return b;
 }
 export async function closeBrowser() { if (browserP) { const b = await browserP; browserP = null; await b.close(); } }
 

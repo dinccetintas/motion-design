@@ -1,11 +1,14 @@
 {
-  "name": "motion-design",
+  "name": "flatbed",
   "version": "1.0.0",
-  "description": "",
+  "description": "A motion design studio run by AI agents: films rendered in code, music composed in code, every cut measured.",
   "main": "server/index.js",
   "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node server/index.js",
+    "test": "node --test test/*.test.mjs",
+    "render": "node render.mjs",
+    "showcase": "node scripts/showcase.mjs"
   },
   "repository": {
     "type": "git",

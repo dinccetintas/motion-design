@@ -96,11 +96,12 @@ section { padding: 112px 40px 96px; max-width: 1680px; margin: 0 auto; }
 .measure-table { border-top: 1px solid var(--rule); }
 .mrow { display: grid; grid-template-columns: minmax(0, 3fr) repeat(7, minmax(0, 1fr)); align-items: center; gap: 12px; padding: 14px 0; border-bottom: 1px solid var(--spool); }
 .mrow.head { color: var(--dim); }
+.mrow.head .n { font-size: 12px; letter-spacing: 0.04em; overflow-wrap: anywhere; }
 .mrow .film { font-family: var(--f-cond); font-weight: 800; font-size: 22px; text-transform: uppercase; }
 .mrow .n { font-family: var(--f-mono); font-variant-numeric: tabular-nums; font-size: 20px; text-align: right; }
 .mrow .n.low { color: var(--orange); }
 .mrow .n.all { font-weight: 700; }
-.measure-note { margin-top: 18px; font-size: 14px; color: var(--dim); max-width: 80ch; }
+.measure-note { margin-top: 18px; font-size: 14px; color: var(--dim); max-width: 68ch; }
 
 /* The bench: a call sheet, label | value | note */
 .specs { margin: 0; border-top: 1px solid var(--rule); }
