@@ -1,0 +1,231 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Showreel</title>
+<style>html,body{margin:0;background:#111}canvas{display:block}</style>
+</head>
+<body>
+<canvas id="c" width="1080" height="1920"></canvas>
+<script>
+// Inlined from lib/motion.js: Chromium blocks ES module imports over file://.
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+function spring(t, k = 170, d = 26) {
+  if (t <= 0) return 0;
+  const w0 = Math.sqrt(k), z = d / (2 * w0);
+  if (z < 1) {
+    const wd = w0 * Math.sqrt(1 - z * z);
+    return 1 - Math.exp(-z * w0 * t) * (Math.cos(wd * t) + (z * w0 / wd) * Math.sin(wd * t));
+  }
+  return 1 - Math.exp(-w0 * t) * (1 + w0 * t);
+}
+function track(t, keys, k = 170, d = 26) {
+  let v = keys[0][1];
+  for (let i = 1; i < keys.length; i++)
+    v += (keys[i][1] - keys[i - 1][1]) * spring(t - keys[i][0], k, d);
+  return v;
+}
+
+// 120 BPM: one beat = 0.5s, one bar = 2s. One shot per bar.
+const W = 1080, H = 1920, B = 0.5;
+const INK = '#111111', BONE = '#EDE8DF', ACC = '#FF4A1C';
+const DISP = '"Inter Display", Inter, sans-serif', MONO = '"DejaVu Sans Mono", monospace';
+const ctx = document.getElementById('c').getContext('2d');
+
+// Type: critically damped, no overshoot. UI: tiny overshoot.
+const typeS = (t, k = 260) => spring(t, k, 2 * Math.sqrt(k));
+const uiS = (t, k = 300) => spring(t, k, 26);
+const uiTrack = (t, keys) => track(t, keys, 300, 26);
+
+function bg(c) { ctx.fillStyle = c; ctx.fillRect(0, 0, W, H); }
+function rrect(x, y, w, h, r) {
+  r = Math.max(0, Math.min(r, w / 2, h / 2));
+  ctx.beginPath(); ctx.roundRect(x, y, w, h, r);
+}
+function mix(a, b, p) {
+  const pa = [1, 3, 5].map((i) => parseInt(a.slice(i, i + 2), 16));
+  const pb = [1, 3, 5].map((i) => parseInt(b.slice(i, i + 2), 16));
+  return `rgb(${pa.map((v, i) => Math.round(v + (pb[i] - v) * clamp(p))).join(',')})`;
+}
+function typed(s, t, cps = 40) { return s.slice(0, Math.max(0, Math.floor(t * cps))); }
+
+// Shot 1 (0-2s): hook. Stacked kinetic type slams up on each beat.
+function shot1(t) {
+  bg(INK);
+  ctx.font = `900 560px ${DISP}`;
+  const lines = [['MO', BONE], ['TI', BONE], ['ON', ACC]];
+  lines.forEach(([s, col], i) => {
+    const base = 520 + i * 470, p = typeS(t + 0.12 - i * B, 320);
+    ctx.save();
+    ctx.beginPath(); ctx.rect(0, base - 440, W, 460); ctx.clip();
+    ctx.fillStyle = col;
+    ctx.fillText(s, 50, base + (1 - p) * 470);
+    ctx.restore();
+  });
+  ctx.font = `400 44px ${MONO}`; ctx.fillStyle = BONE;
+  ctx.fillText(typed('a showreel from a pure function of time', t - 0.9, 48), 60, 1700);
+  // Accent panel rises to become the next shot's background.
+  const h = H * typeS(t - 1.55, 350);
+  ctx.fillStyle = ACC; ctx.fillRect(0, H - h, W, h);
+}
+
+// Shot 2 (2-4s): a wave runs through a grid; squares -> circles -> solid ink.
+function shot2(t) {
+  bg(ACC);
+  const C = 6, R = 10, cell = 180, oy = 60, ox0 = W * 0.15, oy0 = H * 0.85;
+  ctx.fillStyle = INK;
+  for (let r = 0; r < R; r++) for (let c = 0; c < C; c++) {
+    const cx = c * cell + cell / 2, cy = oy + r * cell + cell / 2;
+    const d = Math.hypot(cx - ox0, cy - oy0) / 2100 * 0.35;
+    const s = uiTrack(t, [[0, 0], [2.0 + d, 0.5], [2.5 + d, 0.3], [3.0 + d, 0.62], [3.4 + d, 1.03]]);
+    const rf = uiTrack(t, [[0, 0], [3.0 + d, 0.5], [3.4 + d, 0]]);
+    const rot = uiTrack(t, [[0, 0], [2.5 + d, Math.PI / 4], [3.4 + d, Math.PI / 2]]);
+    if (s <= 0.001) continue;
+    const sz = cell * s;
+    ctx.save(); ctx.translate(cx, cy); ctx.rotate(rot);
+    rrect(-sz / 2, -sz / 2, sz, sz, sz * rf); ctx.fill();
+    ctx.restore();
+  }
+  // Cover the top/bottom margins as the grid closes.
+  const m = typeS(t - 3.45, 300);
+  ctx.fillRect(0, 0, W, oy * m); ctx.fillRect(0, H - oy * m, W, oy * m);
+}
+
+// Shot 3 (4-6s): three marquee rows enter on beats, opposite directions.
+function shot3(t) {
+  bg(INK);
+  const words = ['TIMING', 'WEIGHT', 'RHYTHM'];
+  ctx.font = `900 300px ${DISP}`;
+  words.forEach((w, i) => {
+    const dir = i % 2 ? -1 : 1;
+    const unit = ctx.measureText(w + '  ').width;
+    const enter = (1 - typeS(t - (4.0 + i * 0.25), 280)) * 1300 * dir;
+    const drift = -dir * 260 * (t - 4);
+    const exit = typeS(t - (5.5 + i * 0.07), 300) * 2100;
+    const base = 660 + i * 420 - exit;
+    let x = -unit + ((drift + enter) % unit);
+    ctx.save();
+    if (i === 1) { ctx.strokeStyle = ACC; ctx.lineWidth = 7; }
+    else ctx.fillStyle = BONE;
+    for (; x < W + unit; x += unit) i === 1 ? ctx.strokeText(w, x, base) : ctx.fillText(w, x, base);
+    ctx.restore();
+  });
+  const h = H * typeS(t - 5.6, 320);
+  ctx.fillStyle = BONE; ctx.fillRect(0, H - h, W, h);
+}
+
+// Shot 4 (6-8s): one shape that never cuts, morphing on every beat.
+function shapeAt(t) {
+  const w = uiTrack(t, [[0, 400], [6.5, 900], [7.0, 580], [7.5, 220], [7.8, 2400]]);
+  const h = uiTrack(t, [[0, 400], [6.5, 300], [7.0, 580], [7.5, 1150], [7.8, 2600]]);
+  const r = uiTrack(t, [[0, 200], [6.5, 150], [7.0, 64], [7.5, 110], [7.8, 0]]);
+  const rot = uiTrack(t, [[0, 0], [7.0, Math.PI / 4], [7.5, 0]]);
+  const col = typeS(t - 7.5, 300) - typeS(t - 7.8, 300);
+  const s = uiS(t - 5.95);
+  return { w: w * s, h: h * s, r: r * s, rot, col };
+}
+function shot4(t) {
+  bg(BONE);
+  const cx = 540, cy = 860;
+  for (let j = 4; j >= 0; j--) {
+    const st = shapeAt(t - j * 0.03);
+    ctx.save(); ctx.globalAlpha = j ? 0.10 : 1;
+    ctx.translate(cx, cy); ctx.rotate(st.rot);
+    ctx.fillStyle = mix(INK, ACC, st.col);
+    rrect(-st.w / 2, -st.h / 2, st.w, st.h, st.r); ctx.fill();
+    ctx.restore();
+  }
+  const st = shapeAt(t);
+  if (t < 7.7) {
+    ctx.fillStyle = ACC; ctx.font = `400 50px ${MONO}`;
+    ctx.fillText(typed('track(t, keys)', t - 6.1, 40), 90, 1500);
+    ctx.fillStyle = INK; ctx.font = `400 44px ${MONO}`;
+    const deg = Math.round(st.rot * 180 / Math.PI);
+    ctx.fillText(`w ${st.w | 0}  h ${st.h | 0}  r ${st.r | 0}  θ ${deg}°`, 90, 1580);
+  }
+}
+
+// Shot 5 (8-10s): a Lissajous path draws itself while a counter climbs.
+function shot5(t) {
+  bg(INK);
+  const head = spring(t - 8.0, 10, 2 * Math.sqrt(10)), tail = spring(t - 9.2, 30, 2 * Math.sqrt(30));
+  const P = (u) => [540 + 400 * Math.sin(3 * u + Math.PI / 2), 760 + 400 * Math.sin(4 * u)];
+  const N = 700, a = Math.floor(tail * N), b = Math.floor(head * N);
+  ctx.strokeStyle = ACC; ctx.lineWidth = 12; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  ctx.beginPath();
+  for (let i = a; i <= b; i++) { const [x, y] = P(i / N * Math.PI * 2); i === a ? ctx.moveTo(x, y) : ctx.lineTo(x, y); }
+  ctx.stroke();
+  if (b > a) { const [x, y] = P(b / N * Math.PI * 2); ctx.fillStyle = BONE; ctx.beginPath(); ctx.arc(x, y, 20, 0, Math.PI * 2); ctx.fill(); }
+  const v = Math.round(240 * typeS(t - 8.3, 40));
+  const up = typeS(t - 8.2, 280);
+  ctx.save(); ctx.beginPath(); ctx.rect(0, 1300, W, 330); ctx.clip();
+  ctx.fillStyle = BONE; ctx.font = `900 300px ${DISP}`;
+  ctx.fillText(String(v), 70, 1600 + (1 - up) * 330);
+  ctx.restore();
+  ctx.fillStyle = BONE; ctx.font = `400 42px ${MONO}`;
+  ctx.fillText(typed('per second: 60 fps × 4 subframes', t - 8.6, 50), 80, 1700);
+}
+
+// Shot 6 (10-12s): diagonal bands sweep in on eighth notes, then out.
+function shot6(t) {
+  bg(BONE);
+  const words = ['NO', 'TIMELINE.', 'JUST', 'f(t)'];
+  const fills = [INK, ACC, INK, ACC], inks = [BONE, INK, BONE, INK];
+  ctx.save(); ctx.translate(540, 960); ctx.rotate(-0.21);
+  words.forEach((w, i) => {
+    const dir = i % 2 ? -1 : 1;
+    const x = (1 - typeS(t - (10.0 + i * 0.25), 300)) * -1900 * dir + typeS(t - (11.45 + i * 0.06), 320) * 1900 * dir;
+    const y = (i - 1.5) * 340;
+    ctx.save(); ctx.translate(x, y);
+    ctx.fillStyle = fills[i]; ctx.fillRect(-1100, -160, 2200, 320);
+    ctx.font = `900 100px ${DISP}`;
+    const fs = Math.min(250, 100 * 900 / ctx.measureText(w).width);
+    ctx.font = `900 ${fs}px ${DISP}`; ctx.fillStyle = inks[i];
+    ctx.fillText(w, -470, fs * 0.36);
+    ctx.restore();
+  });
+  ctx.restore();
+}
+
+// Shot 7 (12-15s): lockup. A dropped circle becomes the underline.
+function shot7(t) {
+  bg(BONE);
+  const push = 1 + 0.03 * typeS(t - 13.8, 12);
+  ctx.save(); ctx.translate(540, 960); ctx.scale(push, push); ctx.translate(-540, -960);
+  ctx.font = `900 316px ${DISP}`;
+  ['SHOW', 'REEL'].forEach((word, li) => {
+    const base = 900 + li * 340;
+    ctx.save(); ctx.beginPath(); ctx.rect(0, base - 250, W, 270); ctx.clip();
+    ctx.fillStyle = INK;
+    let x = 60;
+    [...word].forEach((ch, j) => {
+      const p = typeS(t - (12.15 + li * 0.25 + j * 0.05), 300);
+      ctx.fillText(ch, x, base + (1 - p) * 320);
+      x += ctx.measureText(ch).width;
+    });
+    ctx.restore();
+  });
+  const cx = uiTrack(t, [[0, 820], [13.5, 540]]);
+  const cy = uiTrack(t, [[0, -300], [12.0, 420], [13.5, 1310]]);
+  const w = uiTrack(t, [[0, 280], [13.5, 940]]);
+  const h = uiTrack(t, [[0, 280], [13.5, 28]]);
+  ctx.fillStyle = ACC; rrect(cx - w / 2, cy - h / 2, w, h, Math.min(w, h) / 2); ctx.fill();
+  ctx.save(); ctx.beginPath(); ctx.rect(0, 1380, W, 240); ctx.clip();
+  ctx.fillStyle = ACC; ctx.font = `900 200px ${DISP}`;
+  ctx.fillText('2026', 60, 1600 + (1 - typeS(t - 13.75, 300)) * 230);
+  ctx.restore();
+  ctx.fillStyle = INK; ctx.font = `400 46px ${MONO}`;
+  ctx.fillText(typed('every frame = seek(t)', t - 14.0, 36), 66, 1730);
+  ctx.restore();
+}
+
+const SHOTS = [shot1, shot2, shot3, shot4, shot5, shot6, shot7];
+window.seek = (t) => {
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.textBaseline = 'alphabetic';
+  SHOTS[Math.min(SHOTS.length - 1, Math.floor(t / 2))](t);
+};
+window.seek(0);
+</script>
+</body>
+</html>
