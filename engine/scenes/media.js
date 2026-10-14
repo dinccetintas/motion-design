@@ -178,7 +178,11 @@ export const endcard = {
     const P = palette(g, S), ctx = g.ctx, box = g.safe;
     const name = String(p.name || S.brand?.name || '');
     const logo = p.logo ? S.assets?.[p.logo] : null;
-    const L = g.fit(name, { ...box, h: box.h * (g.portrait ? 0.32 : 0.4) }, { role: 'display', maxLines: 2 });
+    // The wordmark is set letter by letter (no kerning) and a dot lands after it: leave room for both.
+    const nameBox = (w) => ({ ...box, w, h: box.h * (g.portrait ? 0.32 : 0.4) });
+    let L = g.fit(name, nameBox(box.w), { role: 'display', maxLines: 2 });
+    const setW = (F) => { g.font(F.size, 'display'); return Math.max(...F.lines.map((ln) => ln.x + [...g.cased(ln.words.map((w) => w.text).join(' '))].reduce((a, ch) => a + g.measure(ch), 0))) + F.size * 0.24; };
+    for (let k = 0; k < 3 && setW(L) > box.w; k++) L = g.fit(name, nameBox(box.w * box.w / setW(L)), { role: 'display', maxLines: 2 });
     const est = L.h + g.u * (p.tagline ? 20 : 0) + g.u * (p.cta ? 17 : 0) + g.u * (p.url ? 7 : 0);
     let y = box.y + Math.max(g.u * 18, (box.h - est) * 0.45);
     if (logo) {
