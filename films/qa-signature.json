@@ -1,0 +1,11 @@
+{
+ "title": "QA: signature scenes", "format": "9:16", "style": "swiss", "music": {"mood": "drive", "seed": 2},
+ "assets": {"mobile": "/films/assets/linear-mobile.png"},
+ "scenes": [
+  {"type": "flap", "beats": 6, "ground": "dark", "transition": "cut", "props": {"lines": ["DEPARTS", "*FRIDAY*", "10:00"]}},
+  {"type": "highlight", "beats": 8, "ground": "light", "transition": "panel", "props": {"text": "After six months, 56 of the 61 companies chose to continue with the four-day week, and 18 made the change permanent.", "mark": "56 of the 61 companies", "source": "Autonomy, 2023"}},
+  {"type": "assemble", "beats": 6, "ground": "dark", "transition": "slice", "props": {"text": "Volt *01*", "sub": "The lightest shoe we have made"}},
+  {"type": "device", "beats": 8, "ground": "light", "transition": "push", "props": {"image": "mobile", "title": "Plan on the go", "focus": [0.5, 0.4]}},
+  {"type": "endcard", "beats": 4, "ground": "accent", "transition": "zoom", "props": {"name": "Signature"}}
+ ]
+}

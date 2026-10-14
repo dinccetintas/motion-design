@@ -97,6 +97,7 @@ window.qaText = (times) => {
     const img = ctx.getImageData(0, 0, film.W, film.H).data;
     const px = (x, y) => { x = Math.max(0, Math.min(film.W - 1, Math.round(x))); y = Math.max(0, Math.min(film.H - 1, Math.round(y))); const i = (y * film.W + x) * 4; return [img[i], img[i + 1], img[i + 2]]; };
     for (const b of boxes) {
+      if (b.contrast != null) continue;   // scene measured it itself
       // Background: pixels inside the ink box that are clearly not the text color.
       const tc = hexRgb(b.color), inside = [];
       for (let yy = 0; yy < 7; yy++) for (let xx = 0; xx < 15; xx++) {

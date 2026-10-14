@@ -76,9 +76,9 @@ export async function run(project, message, emit) {
 
   // ---- Director
   const assetKeys = Object.keys(raw.assets || {}).map((k) => k.replace(/\.\w+$/, ''));
-  const schema = filmSchema({ assets: assetKeys.filter((k) => k !== 'logo'), logo: assetKeys.includes('logo') ? 'logo' : null });
+  const schema = filmSchema({ assets: assetKeys.filter((k) => k !== 'logo' && k !== 'mobile').concat(assetKeys.includes('mobile') ? ['mobile'] : []), logo: assetKeys.includes('logo') ? 'logo' : null });
   say('director', 'start', revise ? 'Re-cutting with your note' : 'Blocking the film on the beat grid');
-  const assetNote = assetKeys.length ? `Image assets available: ${assetKeys.join(', ')} (page = full-page screenshot, hero = first screen, logo = brand logo).` : 'No image assets: do not use screen or image scenes.';
+  const assetNote = assetKeys.length ? `Image assets available: ${assetKeys.join(', ')} (page = full-page desktop screenshot, hero = first screen, mobile = the site on a phone for the device scene, logo = brand logo).` : 'No image assets: do not use screen or image scenes.';
   const brief = `Dossier:\n${json(dossier)}\n\nStory:\n${json(story)}\n\nArt direction:\n${json(art)}\n\n${assetNote}\nURL: ${raw.host || 'none'}\n\nClient request: ${project.messages[0]?.text}`;
   if (revise) {
     if (llm) spec = await callJSON({ system: P.REVISE, content: `${brief}\n\nCurrent spec:\n${json(stripRuntime(project.spec))}\n\nClient's new note: ${message}`, schema, effort: 'high', onThink: (t) => say('director', 'think', t) });

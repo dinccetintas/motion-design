@@ -5,13 +5,15 @@ import { openFilm, contactSheet } from './renderer.js';
 import { plan, planCues } from '../engine/film.js';
 import { parseRich } from '../engine/gfx.js';
 
-const HOOK_TYPES = new Set(['title', 'tunnel', 'justify', 'counter', 'marquee', 'grid', 'swap']);
+const HOOK_TYPES = new Set(['title', 'tunnel', 'justify', 'counter', 'marquee', 'grid', 'swap', 'flap', 'assemble']);
 const clamp10 = (v) => Math.max(1, Math.min(10, Math.round(v * 10) / 10));
 
 /** Words a viewer must read in a scene (copy fields only). */
 function sceneWords(sc) {
   const p = sc.props || {}, parts = [];
-  for (const k of ['text', 'sub', 'prefix', 'title', 'label', 'caption', 'tagline', 'value', 'center']) if (typeof p[k] === 'string') parts.push(p[k]);
+  // A highlight scene asks the viewer to read the marked phrase; the paragraph is texture.
+  if (sc.type === 'highlight') return parseRich(`${p.mark || ''} ${p.source || ''}`).length + 4;
+  for (const k of ['text', 'sub', 'prefix', 'title', 'label', 'caption', 'tagline', 'value', 'center', 'source']) if (typeof p[k] === 'string') parts.push(p[k]);
   for (const k of ['items', 'lines', 'words']) if (Array.isArray(p[k])) for (const it of p[k]) parts.push(typeof it === 'string' ? it : `${it.label ?? ''} ${it.text ?? ''}`);
   if (p.left) parts.push(`${p.left.label ?? ''} ${p.left.value ?? ''}`);
   if (p.right) parts.push(`${p.right.label ?? ''} ${p.right.value ?? ''}`);
@@ -118,7 +120,7 @@ export async function analyze(spec, opts = {}) {
   for (let i = 2; i < grounds.length; i++) if (grounds[i] === grounds[i - 1] && grounds[i] === grounds[i - 2]) { variety -= 0.8; add('minor', 'variety', i, `Three ${grounds[i]} grounds in a row.`, 'Alternate dark / light / accent grounds.'); }
   if (transitions.length >= 5 && new Set(transitions).size < 3) { variety -= 1; add('minor', 'variety', null, 'Few transition types.', 'Use at least three different transitions.'); }
   for (const s of P.scenes) {
-    if (s.dur > 4.6 && !['screen', 'quote', 'linechart', 'bars', 'timeline', 'code', 'endcard', 'swap', 'orbit', 'globe'].includes(s.type)) { variety -= 0.6; add('minor', 'variety', s.i, `Scene runs ${s.dur.toFixed(1)}s; something new should happen every 2-4s.`, `Trim to ${Math.round(4 / P.beat)} beats.`); }
+    if (s.dur > 4.6 && !['screen', 'device', 'highlight', 'quote', 'linechart', 'bars', 'timeline', 'code', 'endcard', 'swap', 'orbit', 'globe'].includes(s.type)) { variety -= 0.6; add('minor', 'variety', s.i, `Scene runs ${s.dur.toFixed(1)}s; something new should happen every 2-4s.`, `Trim to ${Math.round(4 / P.beat)} beats.`); }
     if (s.dur < 1.4) { variety -= 0.4; add('minor', 'variety', s.i, `Scene is only ${s.dur.toFixed(1)}s.`, 'Give it at least 3 beats.'); }
   }
   if (!['endcard'].includes(P.scenes.at(-1)?.type)) { variety -= 0.8; add('minor', 'variety', P.scenes.length - 1, 'The film does not close on a lockup.', 'End with an endcard scene.'); }

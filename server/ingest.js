@@ -113,6 +113,17 @@ export async function ingestUrl(url, dir, { onStatus = () => {} } = {}) {
     await page.waitForTimeout(400);
     await page.screenshot({ path: join(dir, 'page.png'), clip: { x: 0, y: 0, width: 1440, height: fh } }).catch(() => {});
     assets.page = 'page.png';
+    // Mobile: the same page as a phone sees it, for the device scene.
+    try {
+      const mctx = await b.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true, userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1' });
+      const mp = await mctx.newPage();
+      await mp.goto(page.url(), { waitUntil: 'domcontentloaded', timeout: 20000 });
+      await mp.waitForLoadState('networkidle', { timeout: 6000 }).catch(() => {});
+      const mh = await mp.evaluate(() => Math.min(document.documentElement.scrollHeight, 3200));
+      await mp.screenshot({ path: join(dir, 'mobile.png'), clip: { x: 0, y: 0, width: 390, height: Math.max(844, mh) } });
+      assets.mobile = 'mobile.png';
+      await mctx.close();
+    } catch { /* mobile capture is optional */ }
     // Logo: fetch the best candidate so the end card can use it.
     const logoSrc = data.logos.sort((a, b) => b.w * b.h - a.w * a.h)[0]?.src || data.icon;
     if (logoSrc) {
