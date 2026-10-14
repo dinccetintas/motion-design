@@ -13,4 +13,4 @@ ffmpeg -loglevel error -y -i out/reel_16x9.mp4 -vf "fps=1,scale=384:-1,tile=6x10
 ffmpeg -loglevel error -y -i out/reel_9x16.mp4 -vf "fps=1,scale=180:-1,tile=12x5" -frames:v 1 out/reel_9x16_contact.png
 ffmpeg -loglevel error -y -ss 16.3 -i out/reel_16x9.mp4 -vf "scale=320:-1,tile=12x1" -frames:v 1 out/reel_strip_handoff.png
 ffmpeg -loglevel error -y -ss 58.5 -i out/reel_16x9.mp4 -frames:v 1 out/reel_poster.png
-ffprobe -v error -show_entries stream=codec_name,width,height,r_frame_rate,nb_frames -show_entries format=duration -of compact out/reel_16x9.mp4 out/reel_9x16.mp4
+for f in out/reel_16x9.mp4 out/reel_9x16.mp4; do ffprobe -v error -show_entries stream=codec_name,width,height,r_frame_rate,nb_frames -show_entries format=duration -of compact "$f"; done
