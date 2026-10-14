@@ -84,3 +84,9 @@ npm test
 Every film is a pure function of time. No CSS transitions, timers or carried state in render
 mode; noise is seeded. Frames render in parallel workers, four subframes are blended per frame
 for motion blur, and video is encoded H.264 yuv420p at CRF 16 with the score at −14 LUFS.
+
+## Credits
+
+The black-holes showcase film uses the image of M87* by the Event Horizon Telescope
+Collaboration, licensed CC BY 4.0. Every other frame, font setting and sound is drawn or
+synthesized by the engine.

@@ -113,6 +113,28 @@ export async function ingestUrl(url, dir, { onStatus = () => {} } = {}) {
     await page.waitForTimeout(400);
     await page.screenshot({ path: join(dir, 'page.png'), clip: { x: 0, y: 0, width: 1440, height: fh } }).catch(() => {});
     assets.page = 'page.png';
+    // Photos: the largest real photographs on the page (or its share image), for plate scenes.
+    try {
+      const cands = await page.evaluate(() => [...document.images].map((im) => {
+        const r = im.getBoundingClientRect();
+        return { src: im.currentSrc || im.src, nw: im.naturalWidth, nh: im.naturalHeight, area: r.width * r.height, chrome: !!im.closest('header, nav, footer'), alt: im.alt || '' };
+      }).filter((c) => c.src && !c.chrome && c.nw >= 640 && c.nh >= 360 && c.area >= 120000 && !/\.svg(\?|$)|logo|icon|avatar|sprite/i.test(c.src + ' ' + c.alt))
+        .sort((a, b) => b.area - a.area).slice(0, 6));
+      if (data.ogImage) cands.push({ src: new URL(data.ogImage, page.url()).href });
+      for (const c of cands) {
+        if (assets.photo) break;
+        const res = await page.request.get(c.src, { timeout: 8000 }).catch(() => null);
+        const ct = res?.headers()['content-type'] || '';
+        if (!res?.ok() || !/image\/(png|jpeg|webp)/.test(ct)) continue;
+        const body = await res.body();
+        if (body.length > 6e6) continue;
+        const t = await photoTraits(page, `data:${ct.split(';')[0]};base64,${body.toString('base64')}`);
+        if (!t || !t.photo) continue;
+        const ext = ct.includes('png') ? 'png' : ct.includes('webp') ? 'webp' : 'jpg';
+        writeFileSync(join(dir, 'photo.' + ext), body);
+        assets.photo = 'photo.' + ext;
+      }
+    } catch { /* photos are optional */ }
     // Mobile: the same page as a phone sees it, for the device scene.
     try {
       const mctx = await b.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true, userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1' });
@@ -147,6 +169,24 @@ export async function ingestUrl(url, dir, { onStatus = () => {} } = {}) {
       assets,
     };
   } finally { await ctx.close(); }
+}
+
+/** Is this image a photograph (rich tones, not a flat UI card or a white product sheet)? */
+async function photoTraits(page, dataUrl) {
+  return page.evaluate(async (url) => {
+    const im = new Image(); im.src = url;
+    try { await im.decode(); } catch { return null; }
+    const c = document.createElement('canvas'); c.width = c.height = 48;
+    const x = c.getContext('2d'); x.drawImage(im, 0, 0, 48, 48);
+    const d = x.getImageData(0, 0, 48, 48).data, set = new Set();
+    let white = 0;
+    for (let i = 0; i < d.length; i += 4) {
+      set.add(((d[i] >> 4) << 8) | ((d[i + 1] >> 4) << 4) | (d[i + 2] >> 4));
+      if (d[i] > 235 && d[i + 1] > 235 && d[i + 2] > 235) white++;
+    }
+    const colors = set.size, whiteFrac = white / 2304;
+    return { colors, white: whiteFrac, w: im.naturalWidth, h: im.naturalHeight, photo: colors >= 100 && whiteFrac < 0.35 };
+  }, dataUrl).catch(() => null);
 }
 
 // ---- Brand palette ---------------------------------------------------------------

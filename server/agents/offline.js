@@ -169,6 +169,13 @@ export function directFrom(dossier, art, raw, request = '') {
   else push('title', { text: accentize(hookText) }, 4, 'cut');
 
   if (raw.assets?.page || raw.assets?.hero) push('screen', { image: raw.assets.page ? 'page' : 'hero', title: short(dossier.proof?.[0] || name, 5), url: raw.host || '', focus: [0.3, 0.32] }, 8, 'stack');
+  // A real photograph from the source: seen through the brand's name, then the camera dives in.
+  if (raw.assets?.photo) {
+    const kwWord = words(`${dossier.subject} ${dossier.promise}`).map((w) => w.replace(/\W/g, '')).find((w) => w.length >= 3 && w.length <= 8 && !STOP.has(w.toLowerCase()));
+    const word = /^[\w&]{2,8}$/.test(name) ? name : kwWord;
+    const cap1 = (dossier.proof || []).map((x) => clause(x, 7)).find(Boolean) || clause(strip(dossier.promise || ''), 7);
+    if (word) push('plate', { image: 'photo', word, caption: cap1 ? accentize(cap(cap1)) : undefined }, 7, 'cut');
+  }
   const num = (dossier.numbers || []).map((n) => ({ n, p: parseNumber(n.value) })).find((x) => x.p && x.p.value > 0);
   if (num) {
     // Label: the clause right after the number reads best ("$5B | in online revenue").

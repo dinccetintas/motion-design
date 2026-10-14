@@ -82,3 +82,15 @@ test('split-flap lines fit the board or are refused', () => {
   assert.equal(flapLines('one two three four five six seven eight nine ten'), null);
   assert.equal(pickParagraph(['Home Pricing Log in', 'const x = a_b;']), null);
 });
+
+test('a real photograph becomes a plate scene seen through the brand name', () => {
+  const raw = { kind: 'url', name: 'Acme', host: 'acme.dev', url: 'https://acme.dev', title: 'Acme', description: 'Rockets for small teams.',
+    headings: { h1: ['Rockets for small teams'], h2: ['Launch in days', 'Pay per flight'], h3: [] }, paragraphs: [],
+    ctas: [], numbers: [], brand: { colors: {} }, assets: { photo: 'photo.jpg' } };
+  const d = dossierFrom(raw), spec = directFrom(d, artFrom(d, raw, ''), raw, '');
+  const { spec: s, problems } = repair(spec, { assets: ['photo'] });
+  assert.equal(problems.length, 0, problems.join('; '));
+  const pl = s.scenes.find((x) => x.type === 'plate');
+  assert.ok(pl, 'uses the photograph');
+  assert.equal(pl.props.word, 'Acme');
+});

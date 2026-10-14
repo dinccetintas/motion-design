@@ -47,9 +47,20 @@
    }
   },
   {
-   "type": "counter",
+   "type": "plate",
    "beats": 6,
    "ground": "dark",
+   "transition": "cut",
+   "props": {
+    "image": "m87",
+    "word": "M87",
+    "caption": "The first *photograph* of a black hole"
+   }
+  },
+  {
+   "type": "counter",
+   "beats": 6,
+   "ground": "light",
    "transition": "push",
    "props": {
     "value": 4,
@@ -136,5 +147,9 @@
     "tagline": "A two-minute idea in thirty seconds"
    }
   }
- ]
+ ],
+ "assets": {
+  "m87": "/films/assets/m87.jpg"
+ },
+ "credits": "Image of M87*: Event Horizon Telescope Collaboration, CC BY 4.0"
 }

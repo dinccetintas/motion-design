@@ -36,6 +36,7 @@ export const PROPS = {
   flap: obj({ lines: strs('1-3 lines, <= 12 characters each; wrap one in *asterisks* for accent') }, ['lines']),
   highlight: obj({ text: str('a paragraph from the source, 15-35 words'), mark: str('exact phrase inside text to highlight, 2-8 words'), source: str('optional source line') }, ['text', 'mark']),
   assemble: obj({ text: str('1-3 words, one *accent*'), sub: str('optional line, <= 8 words') }, ['text']),
+  plate: obj({ image: str('asset key of a photograph'), word: str('ONE word, 3-8 letters, naming what the photo shows'), caption: str('optional, <= 8 words, one *accent* word') }, ['image', 'word']),
   device: obj({ image: str('asset key of a mobile screenshot'), title: str('optional headline, <= 6 words'), focus: { type: 'array', items: { type: 'number' }, description: '[x, y] 0-1 point to tap' } }, ['image']),
   endcard: obj({ name: str('brand or film name'), tagline: str('<= 7 words'), cta: str('<= 3 words'), url: str('domain'), logo: str('optional logo asset key') }, ['name']),
 };
@@ -43,13 +44,17 @@ export const PROPS = {
 /** Full FilmSpec schema. `assets` limits which image keys screen/image scenes may use. */
 export function filmSchema({ assets = [], logo = null } = {}) {
   const imageKeys = assets.filter((k) => k !== logo && k !== 'mobile');
+  // Plates want photographs, not screenshots of a UI.
+  const photoKeys = imageKeys.filter((k) => !['page', 'hero'].includes(k));
   const variants = Object.keys(SCENES).filter((t) => {
     if (t === 'screen' || t === 'image') return imageKeys.length > 0;
+    if (t === 'plate') return photoKeys.length > 0;
     if (t === 'device') return assets.includes('mobile');
     return true;
   }).map((type) => {
     let props = JSON.parse(JSON.stringify(PROPS[type]));
     if (type === 'screen' || type === 'image') props.properties.image = { type: 'string', enum: imageKeys };
+    if (type === 'plate') props.properties.image = { type: 'string', enum: photoKeys };
     if (type === 'device') props.properties.image = { type: 'string', enum: ['mobile'] };
     if (type === 'endcard') { if (logo) props.properties.logo = { type: 'string', enum: [logo] }; else delete props.properties.logo; }
     return obj({
@@ -78,7 +83,7 @@ export function repair(spec, { assets = [] } = {}) {
   const s = JSON.parse(JSON.stringify(spec || {}));
   s.scenes = (s.scenes || []).filter((sc) => {
     if (!SCENES[sc?.type]) { problems.push(`unknown scene type ${sc?.type}`); return false; }
-    if ((sc.type === 'screen' || sc.type === 'image' || sc.type === 'device') && !assets.includes(sc.props?.image)) { problems.push(`${sc.type} uses missing image ${sc.props?.image}`); return false; }
+    if (['screen', 'image', 'device', 'plate'].includes(sc.type) && !assets.includes(sc.props?.image)) { problems.push(`${sc.type} uses missing image ${sc.props?.image}`); return false; }
     const req = PROPS[sc.type].required || [];
     for (const k of req) if (sc.props?.[k] == null || (Array.isArray(sc.props[k]) && !sc.props[k].length)) { problems.push(`${sc.type} missing ${k}`); return false; }
     return true;

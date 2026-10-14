@@ -1,8 +1,8 @@
 // Signature scenes: the kinetic devices people remember.
-import { sp, ew, ease, clamp, alpha, lerp, hash, track, bump, TAU } from '../core.js';
+import { sp, ew, ease, clamp, alpha, lerp, hash, track, bump, TAU, contrast } from '../core.js';
 import { drawText } from '../kinetic.js';
 import { parseRich } from '../gfx.js';
-import { palette, textOpts, splitV, exitAt, arr } from './util.js';
+import { palette, textOpts, splitV, exitAt, arr, imageTone } from './util.js';
 
 const FLAP_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
 
@@ -250,4 +250,127 @@ export const device = {
     ctx.restore();
   },
   cues(p, S) { const b = S.beat; return [{ t: 0.05, sfx: 'whoosh', gain: 0.45, dur: 0.5 }, { t: b * 2, sfx: 'swish', gain: 0.3 }, { t: b * 4, sfx: 'swish', gain: 0.3 }, { t: b * 5, sfx: 'click', gain: 0.7 }]; },
+};
+
+// ---- Plate: the photograph lives inside a giant word, then the camera dives through a letter ----
+/** Lay the word out once: size, baseline, and the deepest point inside a letter stroke to dive into. */
+function plateLayout(g, word) {
+  const key = `${word}|${g.W}x${g.H}|${g.style.fonts.display.family}`;
+  g._plate = g._plate || new Map();
+  if (g._plate.has(key)) return g._plate.get(key);
+  const box = g.safe;
+  const L = g.fit(word, { ...box, h: box.h * (g.portrait ? 0.55 : 0.78) }, { role: 'display', maxLines: 2, maxSize: g.u * 95 });
+  // Center the caps, not the line box: a single huge word should sit on the optical middle.
+  const oy = box.y + (box.h - (L.lines.length - 1) * L.lineH - L.capH) / 2 - (L.lines[0].y - L.capH);
+  // Light display faces get a matching stroke so the photo has room to show through the letters.
+  const ox = box.x + (box.w - L.w) / 2;   // a single word sits centered
+  const thick = (g.style.fonts.display.weight || 400) < 600 ? L.size * 0.035 : L.size * 0.008;
+  // Rasterize at 1/6 scale and find the solid pixel farthest from any edge: the thickest stroke.
+  const k = 6, w = Math.ceil(g.W / k), h = Math.ceil(g.H / k);
+  const c = document.createElement('canvas'); c.width = w; c.height = h;
+  const x = c.getContext('2d', { willReadFrequently: true });
+  const sub = Object.create(g); sub.ctx = x; sub.probe = null;
+  x.scale(1 / k, 1 / k); x.fillStyle = x.strokeStyle = '#fff'; x.lineJoin = 'round';
+  for (const ln of L.lines) for (const wd of ln.words) { sub.font(L.size, 'display'); x.lineWidth = thick * 2; x.fillText(sub.cased(wd.text), ox + wd.x, oy + ln.y); x.strokeText(sub.cased(wd.text), ox + wd.x, oy + ln.y); }
+  const a = x.getImageData(0, 0, w, h).data, solid = (i, j) => i >= 0 && j >= 0 && i < w && j < h && a[(j * w + i) * 4 + 3] > 127;
+  let best = { d: 1, i: w / 2, j: h / 2, score: -1e9 };
+  const cx = (ox + L.w / 2) / k, cy = (oy + L.h / 2) / k;
+  for (let j = 0; j < h; j++) for (let i = 0; i < w; i++) {
+    if (!solid(i, j)) continue;
+    let d = 1;
+    while (d < 40 && solid(i + d, j) && solid(i - d, j) && solid(i, j + d) && solid(i, j - d) && solid(i + d, j + d) && solid(i - d, j - d)) d++;
+    const score = d - Math.hypot(i - cx, j - cy) * 0.02;   // thick, and near the middle of the word
+    if (score > best.score) best = { d, i, j, score };
+  }
+  const out = { L, ox, oy, thick, tx: best.i * k, ty: best.j * k, stroke: Math.max(2, best.d) * k };
+  g._plate.set(key, out);
+  return out;
+}
+
+export const plate = {
+  beats: 8,
+  describe: 'A real photograph seen only through a giant word, then the camera dives through a letter until the photo fills the frame and a caption lands. For a product shot, a place, an object. Needs props.image.',
+  props: { image: 'asset key of a photograph', word: 'ONE short word, 3-8 letters, that names what the photo shows', caption: 'optional, <= 8 words, one *accent* word' },
+  draw(g, p, lt, S) {
+    const ctx = g.ctx, img = S.assets?.[p.image];
+    // The photo has to read inside the letters: if its tone sinks into this ground, take the
+    // ground it stands out on most.
+    let P = palette(g, S);
+    if (img) {
+      const tone = imageTone(img).color, G = g.style.grounds;
+      if (contrast(tone, P.bg) < 2.2) {
+        const best = ['light', 'dark', 'accent'].sort((a, b) => contrast(tone, G[b].bg) - contrast(tone, G[a].bg))[0];
+        P = palette(g, { ...S, ground: best });
+      }
+    }
+    const word = String(p.word || '').replace(/\*/g, '').trim() || 'LOOK';
+    const { L, ox, oy, thick, tx, ty, stroke } = plateLayout(g, word);
+    const box = g.safe;
+    const z0 = Math.min(S.dur * 0.45, S.beat * 3), zd = Math.min(1.1, S.beat * 2);
+    const zp = ew(lt, z0, zd, ease.inExpo);                 // accelerate into the letter
+    const Z = Math.hypot(g.W, g.H) / stroke * 1.25;
+    const z = Math.exp(Math.log(Z) * zp);
+    const push = 1.14 - 0.1 * clamp(lt / S.dur);            // the photo drifts the whole time
+    g.bg(P.bg);
+    // The word, filled with the photo: paint letters on a scratch layer, then the photo "source-in".
+    // Scratch layer at the canvas's own pixel density; drawn back through the current transform,
+    // so transitions that move or clip this scene still apply.
+    const k = ctx.canvas.width / g.W;
+    const sc = g._plateScratch || (g._plateScratch = document.createElement('canvas'));
+    const pw = Math.round(g.W * k), ph = Math.round(g.H * k);
+    if (sc.width !== pw || sc.height !== ph) { sc.width = pw; sc.height = ph; }
+    const x = sc.getContext('2d');
+    x.setTransform(1, 0, 0, 1, 0, 0); x.globalCompositeOperation = 'source-over'; x.clearRect(0, 0, pw, ph); x.scale(k, k);
+    const sub = Object.create(g); sub.ctx = x; sub.probe = null;
+    if (zp >= 1) { x.fillStyle = '#fff'; x.fillRect(0, 0, g.W, g.H); }
+    else {
+      const px = lerp(tx, g.W / 2, ease.inOutCubic(zp)), py = lerp(ty, g.H / 2, ease.inOutCubic(zp));
+      x.translate(px, py); x.scale(z, z); x.translate(-tx, -ty);
+      sub.font(L.size, 'display');
+      x.fillStyle = x.strokeStyle = '#fff'; x.lineJoin = 'round'; x.lineWidth = thick * 2;
+      let n = 0;
+      for (const ln of L.lines) for (const wd of ln.words) {
+        let wx = ox + wd.x;
+        for (const ch of [...sub.cased(wd.text)]) {
+          // Letters rise into place one by one, each clipped to its line like type through a slot.
+          const pr = sp(lt - 0.04 - n * 0.045, 'snap'); n++;
+          if (pr > 0) {
+            x.save(); x.beginPath(); x.rect(wx - L.size, oy + ln.y - L.capH * 1.3, L.size * 3, L.capH * 1.3 + L.size * 0.28); x.clip();
+            const by = oy + ln.y + (1 - pr) * L.capH * 1.2;
+            x.fillText(ch, wx, by); x.strokeText(ch, wx, by); x.restore();
+          }
+          wx += sub.measure(ch);
+        }
+      }
+    }
+    x.setTransform(1, 0, 0, 1, 0, 0);
+    x.globalCompositeOperation = 'source-in';
+    if (img) {
+      // The photo is framed to the word first, so the subject reads inside the letters,
+      // then opens out to the whole frame as the camera dives through.
+      x.scale(k, k); const s2 = Object.create(g); s2.ctx = x;
+      const wx0 = ox + Math.min(...L.lines.map((l) => l.x)), wy0 = oy + L.lines[0].y - L.capH, ww = L.w, wh = L.lines.at(-1).y - L.lines[0].y + L.capH;
+      const o = ease.inOutCubic(zp), pad = L.size * 0.1;
+      s2.cover(img, lerp(wx0 - pad, 0, o), lerp(wy0 - pad, 0, o), lerp(ww + pad * 2, g.W, o), lerp(wh + pad * 2, g.H, o), 0.5, 0.5, push);
+    }
+    else { x.fillStyle = P.accent; x.fillRect(0, 0, pw, ph); }
+    x.globalCompositeOperation = 'source-over'; x.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.drawImage(sc, 0, 0, g.W, g.H);
+    // The validator reads the word as one record; its contrast is the photo's tone against the ground.
+    if (g.probe && zp < 0.05 && lt > 0.6 && img) {
+      const tone = imageTone(img);
+      g.probe.push({ text: word.toUpperCase(), x0: ox + L.lines[0].x, y0: oy + L.lines[0].y - L.capH, x1: ox + L.w, y1: oy + L.h, size: L.size, color: tone.color, stroke: false, clip: null, contrast: +contrast(tone.color, P.bg).toFixed(2) });
+    }
+    if (p.caption && zp >= 1) {
+      const Lc = g.fit(p.caption, { x: 0, y: 0, w: box.w * 0.9, h: box.h * 0.26 }, { role: 'display', maxLines: 3, maxSize: g.u * 10 });
+      const pad = g.u * 3.5, bx = box.x - pad, by = box.b - Lc.h - pad * 2;
+      const t1 = z0 + zd + 0.15, pp = ew(lt, t1, 0.5);
+      g.rect(bx, by, (Lc.w + pad * 2) * pp, Lc.h + pad * 2 + Lc.size * 0.12, P.bg);
+      drawText(g, Lc, box.x, by + pad, textOpts(P, lt, { start: t1 + 0.1, stagger: 0.05, exitAt: exitAt(S) }));
+    }
+  },
+  cues(p, S) {
+    const z0 = Math.min(S.dur * 0.45, S.beat * 3), zd = Math.min(1.1, S.beat * 2);
+    return [{ t: 0.04, sfx: 'thump', gain: 0.6 }, { t: z0, sfx: 'riser', gain: 0.45, dur: zd }, { t: z0 + zd, sfx: 'impact', gain: 0.8 }];
+  },
 };
