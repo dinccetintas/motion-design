@@ -2,7 +2,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { classify, findNumbers, stripDirections, brandPalette } from '../server/ingest.js';
-import { parseRequest, parseNumber, short, accentize, dossierFrom, artFrom, directFrom } from '../server/agents/offline.js';
+import { parseRequest, parseNumber, short, accentize, dossierFrom, artFrom, directFrom, flapLines, pickParagraph } from '../server/agents/offline.js';
 import { repair } from '../engine/schema.js';
 
 test('classify: urls, articles and topics', () => {
@@ -54,9 +54,31 @@ test('the offline director makes a renderable film from a page dossier', () => {
   const d = dossierFrom(raw), art = artFrom(d, raw, ''), spec = directFrom(d, art, raw, '');
   const { spec: s, problems } = repair(spec, { assets: ['hero', 'page'] });
   assert.equal(problems.length, 0, problems.join('; '));
-  assert.equal(s.scenes[0].type, 'title');
+  assert.ok(['title', 'flap', 'assemble'].includes(s.scenes[0].type), 'opens on a hook scene');
   assert.equal(s.scenes.at(-1).type, 'endcard');
   assert.ok(s.scenes.some((x) => x.type === 'screen'), 'uses the real screenshot');
   assert.ok(s.scenes.some((x) => x.type === 'counter' && x.props.value === 120), 'uses the real number');
   assert.equal(art.palette.accent, '#ff3300', 'brand accent');
+});
+
+test('the offline director quotes the source and uses the phone capture', () => {
+  const para = 'Acme turns a weekend of paperwork into one tap, so small teams can book a launch window before lunch.';
+  const raw = { kind: 'url', name: 'Acme', host: 'acme.dev', url: 'https://acme.dev', title: 'Acme', description: 'Rockets for small teams.',
+    headings: { h1: ['Rockets for small teams'], h2: ['Launch in days', 'Pay per flight'], h3: [] }, paragraphs: ['Log in Sign up Pricing', para],
+    ctas: [], numbers: [], brand: { colors: {} }, assets: { page: 'page.png', mobile: 'mobile.png' } };
+  const d = dossierFrom(raw), spec = directFrom(d, artFrom(d, raw, ''), raw, '');
+  const { spec: s, problems } = repair(spec, { assets: ['page', 'mobile'] });
+  assert.equal(problems.length, 0, problems.join('; '));
+  const hl = s.scenes.find((x) => x.type === 'highlight');
+  assert.ok(hl, 'quotes a real paragraph');
+  assert.equal(hl.props.text, para);
+  assert.ok(para.includes(hl.props.mark), 'the marked phrase is verbatim');
+  assert.ok(s.scenes.some((x) => x.type === 'device' && x.props.image === 'mobile'), 'shows the phone capture');
+});
+
+test('split-flap lines fit the board or are refused', () => {
+  assert.deepEqual(flapLines('Your idea cut on the beat'), ['YOUR IDEA', 'CUT ON THE', 'BEAT']);
+  assert.equal(flapLines('Internationalization everywhere'), null);
+  assert.equal(flapLines('one two three four five six seven eight nine ten'), null);
+  assert.equal(pickParagraph(['Home Pricing Log in', 'const x = a_b;']), null);
 });

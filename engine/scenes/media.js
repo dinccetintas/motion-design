@@ -1,5 +1,5 @@
 // Media scenes: real screenshots, images, code, and the closing lockup.
-import { sp, ew, ease, clamp, alpha, lerp, track, bump, TAU } from '../core.js';
+import { sp, ew, ease, clamp, alpha, lerp, track, bump, TAU, contrast } from '../core.js';
 import { drawText, typed } from '../kinetic.js';
 import { palette, textOpts, splitV, exitAt, arr, num } from './util.js';
 
@@ -156,6 +156,20 @@ export const code = {
   cues(p, S) { const out = []; for (let k = 0; k < 14; k++) out.push({ t: S.beat * 0.5 + k * (S.dur * 0.6) / 14, sfx: 'key', gain: 0.25 }); return out; },
 };
 
+/** Mean color of a logo's opaque pixels, and whether it is a full tile (an app icon). Cached on the image. */
+function logoTone(img) {
+  if (img._tone) return img._tone;
+  const c = document.createElement('canvas'); c.width = c.height = 24;
+  const x = c.getContext('2d', { willReadFrequently: true });
+  x.drawImage(img, 0, 0, 24, 24);
+  const d = x.getImageData(0, 0, 24, 24).data;
+  let r = 0, gg = 0, b = 0, n = 0;
+  for (let i = 0; i < d.length; i += 4) if (d[i + 3] > 128) { r += d[i]; gg += d[i + 1]; b += d[i + 2]; n++; }
+  const hex = (v) => Math.round(v / Math.max(1, n)).toString(16).padStart(2, '0');
+  const tile = [0, 23, 552, 575].every((k) => d[(k + (k % 24 ? -1 : 1) * 1) * 4 + 3] > 200);
+  return (img._tone = { color: `#${hex(r)}${hex(gg)}${hex(b)}`, tile });
+}
+
 export const endcard = {
   beats: 6,
   describe: 'Closing lockup: brand name builds letter by letter, accent mark lands, tagline, CTA pill and URL. Always last.',
@@ -170,6 +184,13 @@ export const endcard = {
     if (logo) {
       const lh = g.u * 16, lw = lh * (logo.width / logo.height), lp = sp(lt, g.style.motion.obj);
       ctx.save(); ctx.globalAlpha = clamp(lp * 2); ctx.translate(box.x, y - lh - g.u * 6 + (1 - lp) * g.u * 6);
+      // A logo that melts into the ground (a purple icon on a purple endcard) sits on an ink plate.
+      const tone = logoTone(logo);
+      if (contrast(tone.color, P.bg) < 1.8) {
+        const pad = tone.tile ? g.u * 0.9 : g.u * 2.2;
+        g.rrect(-pad, -pad, lw + pad * 2, lh + pad * 2, tone.tile ? lh * 0.26 : g.u * 2, P.ink);
+      }
+      if (tone.tile) { ctx.beginPath(); ctx.roundRect(0, 0, lw, lh, lh * 0.22); ctx.clip(); }
       ctx.drawImage(logo, 0, 0, lw, lh); ctx.restore();
     }
     // Per-character build for the wordmark.

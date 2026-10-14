@@ -96,10 +96,12 @@ export const highlight = {
     const plainWords = words.map((w) => w.text.toLowerCase().replace(/[^\w]/g, ''));
     const mw = mark.split(/\s+/).filter(Boolean);
     let ms = -1;
-    for (let i = 0; i + mw.length <= plainWords.length && mw.length; i++) if (mw.every((m, j) => plainWords[i + j] === m)) { ms = i; break; }
+    // Words joined by dashes ("economy—including") still match at the phrase's edges.
+    const eq = (a, m, j) => a === m || (j === 0 && a.endsWith(m)) || (j === mw.length - 1 && a.startsWith(m));
+    for (let i = 0; i + mw.length <= plainWords.length && mw.length; i++) if (mw.every((m, j) => eq(plainWords[i + j], m, j))) { ms = i; break; }
     words.forEach((w, i) => { w.accent = ms >= 0 && i >= ms && i < ms + mw.length; });
     const area = { ...box, h: box.h * (p.source ? 0.82 : 0.9) };
-    const L = g.fit(words, area, { role: 'text', maxLines: g.portrait ? 10 : 6, maxSize: g.u * (g.portrait ? 10.5 : 8.5), lineHeight: 1.28, weight: 500 });
+    const L = g.fit(words, area, { role: 'text', maxLines: g.portrait ? 13 : 7, maxSize: g.u * (g.portrait ? 10.5 : 8.5), lineHeight: 1.28, weight: 500 });
     const oy = box.y + (area.h - L.h) * 0.4;
     const sweep0 = Math.min(S.dur * 0.42, S.beat * 4), dim = ew(lt, sweep0 + 0.6, 0.6, ease.outCubic);
     const hl = g.style.grounds.accent.bg, onHl = g.style.grounds.accent.ink;
@@ -124,7 +126,7 @@ export const highlight = {
       const t0 = 0.05 + idx * Math.min(0.045, (sweep0 - 0.3) / n);
       const pr = sp(lt - t0, 'type');
       if (pr <= 0.01) continue;
-      g.font(L.size, 'text', { weight: w.accent ? 700 : 500 });
+      g.font(L.size, 'text', { weight: 500 });   // the layout was measured at 500; the marker carries the emphasis
       ctx.globalAlpha = clamp(pr * 1.5) * (w.accent ? 1 : 1 - 0.55 * dim);
       const col = w.accent && order > 0 && lt > sweep0 + 0.2 ? (S.ground === 'accent' ? P.bg : onHl) : P.ink;
       g.text(w.text, box.x + w.x, oy + line.y + (1 - pr) * L.size * 0.5, col);

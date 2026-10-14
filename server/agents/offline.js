@@ -4,6 +4,8 @@ import { STYLES } from '../../engine/styles.js';
 import { MOODS } from '../../engine/audio/score.js';
 
 const STOP = new Set('a an the and or but of to in on for with by at from as is are be was were it its this that these those your you our we they their into over under than then so not no more most very just can will all any every how what why when who'.split(' '));
+/** Interface copy, not message: forms, navigation, cookie banners. */
+const UI = /\b(enter your|sign (in|up)|log ?in|get started|subscribe|your email|cookie|click|download the app|contact (us|sales)|learn more|book a demo|recommendations|url)\b/i;
 const words = (s) => String(s || '').replace(/\*/g, '').split(/\s+/).filter(Boolean);
 /** Trim to n words at a natural boundary, without trailing stop words or punctuation. */
 export function short(s, n) {
@@ -66,11 +68,11 @@ export function dossierFrom(raw, request = '') {
   if (raw.kind === 'url') {
     const h = raw.headings || {};
     const promise = h.h1?.[0] || raw.description || raw.title;
-    const proof = [...(h.h2 || []), ...(h.h3 || [])].filter((x) => words(x).length >= 2 && words(x).length <= 9).slice(0, 8);
+    const proof = [...(h.h2 || []), ...(h.h3 || [])].filter((x) => words(x).length >= 2 && words(x).length <= 9 && !UI.test(x)).slice(0, 8);
     return {
       subject: raw.name, audience: '', promise, tone: '', proof,
       numbers: (raw.numbers || []).slice(0, 4).map((n) => ({ value: n.raw, meaning: n.sentence, source: raw.url })),
-      phrases: [raw.description, ...(raw.paragraphs || []).slice(0, 4)].filter(Boolean), quotes: [], cta: (raw.ctas || [])[0] || 'Learn more', sources: [raw.url],
+      phrases: [raw.description, ...(raw.paragraphs || []).slice(0, 6)].filter((x) => x && !UI.test(x)), quotes: [], cta: (raw.ctas || [])[0] || 'Learn more', sources: [raw.url],
     };
   }
   if (raw.kind === 'article') {
@@ -106,17 +108,66 @@ export function artFrom(dossier, raw, request = '') {
 }
 
 // ---- Writer + director --------------------------------------------------------------
+/** A real paragraph worth quoting: a sentence or two of prose, not navigation or a code sample. */
+export function pickParagraph(paras = []) {
+  const ok = paras.map((x) => String(x).trim()).filter((x) => {
+    const n = words(x).length;
+    return n >= 12 && n <= 40 && /[a-z]/.test(x) && /[.!?]$/.test(x) && !/[_{}<>=]/.test(x) && !UI.test(x);
+  });
+  return ok.sort((a, b) => Math.abs(words(a).length - 24) - Math.abs(words(b).length - 24))[0] || null;
+}
+/** The phrase in a paragraph to mark: its strongest clause of 3-7 words, verbatim. */
+export function pickMark(text) {
+  const clauses = text.split(/[,.;:!?()—–]/).map((c) => c.trim()).filter(Boolean);
+  const scored = clauses.map((c) => {
+    let w = words(c);
+    while (w.length > 7) w = w.slice(1);
+    while (w.length > 1 && STOP.has(w[0].toLowerCase())) w = w.slice(1);
+    while (w.length > 1 && STOP.has(w[w.length - 1].toLowerCase())) w = w.slice(0, -1);
+    const phrase = w.join(' ');
+    const weight = w.filter((x) => !STOP.has(x.toLowerCase()) && x.length > 3).length;
+    return { phrase, score: w.length >= 3 ? weight * 2 - Math.abs(w.length - 5) : -9 };
+  }).filter((c) => c.phrase && new RegExp(`(^|[\\s—–(])${c.phrase.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?=[\\s,.;:!?)—–]|$)`).test(text));
+  scored.sort((a, b) => b.score - a.score);
+  return scored[0]?.phrase || words(text).slice(-5).join(' ');
+}
+/** Break a headline into split-flap lines of at most 12 characters, or null if it will not fit 3 lines. */
+export function flapLines(text) {
+  const lines = [];
+  for (const w of words(text.replace(/[^\w\s'&.-]/g, '').toUpperCase())) {
+    if (w.length > 12) return null;
+    const last = lines[lines.length - 1];
+    if (last && (last + ' ' + w).length <= 12) lines[lines.length - 1] = last + ' ' + w; else lines.push(w);
+  }
+  return lines.length >= 1 && lines.length <= 3 ? lines : null;
+}
+/** A clause that stands on its own in at most n words, or null: never a sentence cut mid-thought. */
+export function clause(s, n) {
+  const c = String(s || '').split(/[.!?;:—–(]/)[0].split(/,\s/)[0].trim().replace(/[,\-]+$/, '');
+  const w = words(c);
+  return w.length >= 3 && w.length <= n ? c : null;
+}
+const seedOf = (s) => [...String(s)].reduce((a, c) => (a * 31 + c.charCodeAt(0)) >>> 0, 7);
+
 export function directFrom(dossier, art, raw, request = '') {
   const r = parseRequest(request);
   const scenes = [];
   const name = raw.name || short(dossier.subject || raw.title || 'Untitled', 4);
   const push = (type, props, beats, transition) => scenes.push({ type, props, beats: beats || undefined, transition });
+  const seed = seedOf(name);
   // Hook: the h1 if it is punchy, else the first short headline; never "X is a ...".
   const strip = (x) => String(x || '').replace(new RegExp(`^${name}\\s+(is|are)\\s+(a|an|the)\\s+`, 'i'), '');
   const heads = [raw.headings?.h1?.[0], ...(raw.headings?.h2 || [])].filter((x) => x && words(x).length >= 2 && words(x).length <= 8);
   const hookSrc = heads[0] || strip(dossier.promise) || dossier.subject || name;
-  const hook = accentize(cap(short(hookSrc, 5)));
-  push('title', { text: hook }, 4, 'cut');
+  const hookText = cap(short(hookSrc, 5));
+  // Three ways to open, chosen by the material: a departure board for short punchy lines,
+  // letters assembling a short name, otherwise kinetic type.
+  const flap = flapLines(hookText);
+  const opener = seed % 3;
+  if (flap && opener === 0) push('flap', { lines: flap.map((l, i) => (i === flap.length - 1 ? `*${l}*` : l)) }, 6, 'cut');
+  else if (raw.kind === 'url' && name.length <= 10 && opener === 1) push('assemble', { text: `*${name}*`, sub: short(hookSrc, 6) }, 6, 'cut');
+  else push('title', { text: accentize(hookText) }, 4, 'cut');
+
   if (raw.assets?.page || raw.assets?.hero) push('screen', { image: raw.assets.page ? 'page' : 'hero', title: short(dossier.proof?.[0] || name, 5), url: raw.host || '', focus: [0.3, 0.32] }, 8, 'stack');
   const num = (dossier.numbers || []).map((n) => ({ n, p: parseNumber(n.value) })).find((x) => x.p && x.p.value > 0);
   if (num) {
@@ -127,20 +178,27 @@ export function directFrom(dossier, art, raw, request = '') {
     const label = words(after).length >= 3 ? after : before || after;
     push('counter', { ...num.p, label: accentize(label || 'and counting') }, 6, 'wipe');
   }
+  // The source in its own words, with the line that matters marked.
+  const para = pickParagraph(raw.kind === 'topic' ? [] : (raw.paragraphs || dossier.phrases || []));
+  if (para) push('highlight', { text: para, mark: pickMark(para), source: raw.host || raw.title || undefined }, 8, 'panel');
+  if (raw.assets?.mobile) push('device', { image: 'mobile', title: short((dossier.proof || [])[1] || dossier.promise || name, 5), focus: [0.5, 0.42] }, 8, 'push');
   const items = (dossier.proof || []).map((p) => short(p, 3)).filter((p) => words(p).length >= 2 && words(p).length <= 4);
   const uniq = [...new Set(items)].slice(0, 3);
   if (uniq.length >= 2) push('stack', { items: uniq }, 6, 'slice');
-  const phrase = (dossier.phrases || []).find((p) => words(p).length >= 6) || dossier.promise;
-  if (phrase && words(phrase).length >= 4) push('statement', { text: accentize(short(strip(phrase), 10)) }, 6, 'panel');
+  const phrase = [...(dossier.phrases || []).filter((p) => p !== para), dossier.promise].map((p) => clause(strip(p), 9)).find((c) => c && words(c).length >= 4);
+  if (phrase && scenes.length < 7) push('statement', { text: accentize(cap(phrase)) }, 6, 'iris');
   if (dossier.quotes?.length) push('quote', { text: accentize(short(dossier.quotes[0].text, 20)), author: dossier.quotes[0].speaker }, 8, 'push');
   const kw = words(`${dossier.subject} ${dossier.promise}`).map((w) => w.replace(/\W/g, '')).filter((w) => w.length > 3 && !STOP.has(w.toLowerCase()));
   const kws = [...new Set(kw.map((w) => w.toUpperCase()))].slice(0, 4);
   if (raw.kind === 'topic' || scenes.length < 4) {
     if (kws.length >= 3) push('tunnel', { words: kws.slice(0, 4) }, 6, 'iris');
     push('justify', { lines: kws.slice(0, 3).map((w, i) => (i === 1 ? `*${w}*` : w)) }, 6, 'cut');
-    push('grid', { text: short(dossier.subject || name, 3) }, 6, 'push');
-  } else if (kws.length >= 3) push('justify', { lines: kws.slice(0, 3).map((w, i) => (i === 1 ? `*${w}*` : w)) }, 4, 'cut');
-  push('endcard', { name, tagline: short(raw.description || dossier.promise || '', 6), cta: short(dossier.cta || '', 3) || undefined, url: raw.host || undefined, logo: raw.assets?.logo ? 'logo' : undefined }, 6, 'zoom');
+    // The payoff word assembles from scattered letters.
+    const pay = kws.find((w) => w.length >= 4 && w.length <= 10);
+    if (pay && scenes[0].type !== 'assemble') push('assemble', { text: `*${cap(pay.toLowerCase())}*`, sub: short(dossier.subject || name, 6) }, 6, 'push');
+    else push('grid', { text: short(dossier.subject || name, 3) }, 6, 'push');
+  } else if (kws.length >= 3 && scenes.length < 8) push('justify', { lines: kws.slice(0, 3).map((w, i) => (i === 1 ? `*${w}*` : w)) }, 4, 'cut');
+  push('endcard', { name, tagline: cap(clause(strip(raw.description || ''), 7) || clause(strip(dossier.promise || ''), 7) || short(strip(dossier.promise || ''), 4)), cta: short(dossier.cta || '', 3) || undefined, url: raw.host || undefined, logo: raw.assets?.logo ? 'logo' : undefined }, 6, 'zoom');
   // Grounds: dark / light alternation, accent every third scene.
   const pattern = r.lighter ? ['light', 'dark', 'light', 'accent'] : ['dark', 'light', 'dark', 'accent', 'light', 'dark', 'light'];
   scenes.forEach((s, i) => { s.ground = i === scenes.length - 1 ? 'accent' : pattern[i % pattern.length]; });
