@@ -1,0 +1,151 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Render</title>
+<link rel="stylesheet" href="/fonts/fonts.css">
+<style>html,body{margin:0;background:#000}canvas{display:block}</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<script type="module">
+// Headless render surface. The renderer injects a spec, then calls the window API below.
+import { Film } from '/engine/film.js';
+import { renderScore } from '/engine/audio/score.js';
+
+const canvas = document.getElementById('c');
+let film = null, acc = null, accCtx = null;
+
+async function loadImage(src) {
+  return new Promise((res) => { const im = new Image(); im.onload = () => res(im); im.onerror = () => res(null); im.src = src; });
+}
+
+window.loadFilm = async (spec) => {
+  const assets = {};
+  await Promise.all(Object.entries(spec.assets || {}).map(async ([k, src]) => { assets[k] = await loadImage(src); }));
+  film = new Film(spec, canvas, assets);
+  await film.load();
+  film.seek(0);
+  acc = document.createElement('canvas'); acc.width = film.W; acc.height = film.H;
+  accCtx = acc.getContext('2d');
+  return { W: film.W, H: film.H, duration: film.duration, beat: film.beat, timeline: film.timeline(), missing: Object.entries(assets).filter(([, v]) => !v).map(([k]) => k) };
+};
+
+window.seek = (t) => film.seek(t);
+
+/** One output frame at time t, motion-blurred over `sub` subframes spanning `shutter` of the frame. */
+window.frame = (t, fps = 60, sub = 1, shutter = 0.5, type = 'image/png', q = 0.95) => {
+  if (sub <= 1) { film.seek(t); return canvas.toDataURL(type, q); }
+  const span = shutter / fps;
+  for (let k = 0; k < sub; k++) {
+    film.seek(t - span / 2 + (span * (k + 0.5)) / sub);
+    accCtx.globalAlpha = 1 / (k + 1);          // running mean of subframes
+    accCtx.drawImage(canvas, 0, 0);
+  }
+  accCtx.globalAlpha = 1;
+  return acc.toDataURL(type, q);
+};
+
+/** Text boxes drawn at t (for validators). */
+window.probe = (t) => film.seek(t, { probe: true });
+
+/** Average color of a rect, for contrast checks. */
+window.sample = (x0, y0, x1, y1) => {
+  const ctx = canvas.getContext('2d');
+  const w = Math.max(1, Math.round(x1 - x0)), h = Math.max(1, Math.round(y1 - y0));
+  const d = ctx.getImageData(Math.round(x0), Math.round(y0), w, h).data;
+  return d;
+};
+
+/** Small grayscale thumbnail at t, for motion-energy analysis. */
+window.thumb = (t, w = 96) => {
+  film.seek(t);
+  const h = Math.round(w * film.H / film.W);
+  const c = window._th || (window._th = document.createElement('canvas'));
+  c.width = w; c.height = h;
+  const x = c.getContext('2d', { willReadFrequently: true });
+  x.drawImage(canvas, 0, 0, w, h);
+  const d = x.getImageData(0, 0, w, h).data, out = new Array(w * h);
+  for (let i = 0; i < w * h; i++) out[i] = Math.round(0.299 * d[i * 4] + 0.587 * d[i * 4 + 1] + 0.114 * d[i * 4 + 2]);
+  return out;
+};
+
+/** Contact sheet drawn in-page: frames at `times`, tiled `cols` wide at `scale`. */
+window.sheet = (times, cols = 6, scale = 0.25, labels = true) => {
+  const tw = Math.round(film.W * scale), th = Math.round(film.H * scale), rows = Math.ceil(times.length / cols);
+  const c = document.createElement('canvas'); c.width = cols * tw; c.height = rows * th;
+  const x = c.getContext('2d');
+  x.fillStyle = '#222'; x.fillRect(0, 0, c.width, c.height);
+  times.forEach((t, i) => {
+    film.seek(t);
+    const cx = (i % cols) * tw, cy = Math.floor(i / cols) * th;
+    x.drawImage(canvas, cx, cy, tw, th);
+    if (labels) { x.fillStyle = 'rgba(0,0,0,.7)'; x.fillRect(cx, cy, 64, 20); x.fillStyle = '#fff'; x.font = '13px monospace'; x.fillText(t.toFixed(2) + 's', cx + 4, cy + 15); }
+  });
+  return c.toDataURL('image/png');
+};
+
+// ---- QA probes ---------------------------------------------------------------
+const lum = (r, g, b) => { const f = (v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }; return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b); };
+const hexRgb = (h) => { if (/^rgba?\(/.test(h)) return h.match(/[\d.]+/g).slice(0, 3).map(Number); h = h.replace('#', ''); if (h.length === 3) h = [...h].map((c) => c + c).join(''); const n = parseInt(h.slice(0, 6), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; };
+
+/** Text boxes at each time, with the measured contrast against the pixels around them. */
+window.qaText = (times) => {
+  const ctx = canvas.getContext('2d', { willReadFrequently: true });
+  return times.map((t) => {
+    const boxes = film.seek(t, { probe: true }) || [];
+    const img = ctx.getImageData(0, 0, film.W, film.H).data;
+    const px = (x, y) => { x = Math.max(0, Math.min(film.W - 1, Math.round(x))); y = Math.max(0, Math.min(film.H - 1, Math.round(y))); const i = (y * film.W + x) * 4; return [img[i], img[i + 1], img[i + 2]]; };
+    for (const b of boxes) {
+      // Background: pixels inside the ink box that are clearly not the text color.
+      const tc = hexRgb(b.color), inside = [];
+      for (let yy = 0; yy < 7; yy++) for (let xx = 0; xx < 15; xx++) {
+        const p = px(b.x0 + (b.x1 - b.x0) * (xx + 0.5) / 15, b.y0 + (b.y1 - b.y0) * (yy + 0.5) / 7);
+        if (Math.abs(p[0] - tc[0]) + Math.abs(p[1] - tc[1]) + Math.abs(p[2] - tc[2]) > 60) inside.push(lum(...p));
+      }
+      let bgL;
+      if (inside.length >= 6) { inside.sort((a, c) => a - c); bgL = inside[Math.floor(inside.length / 2)]; }
+      else {
+        const pad = Math.max(3, (b.y1 - b.y0) * 0.15), ring = [];
+        for (let k = 0; k <= 8; k++) { const x = b.x0 + (b.x1 - b.x0) * k / 8; ring.push(lum(...px(x, b.y0 - pad)), lum(...px(x, b.y1 + pad))); }
+        ring.sort((a, c) => a - c); bgL = ring[Math.floor(ring.length / 2)];
+      }
+      const tl = lum(...tc);
+      b.contrast = +((Math.max(tl, bgL) + 0.05) / (Math.min(tl, bgL) + 0.05)).toFixed(2);
+    }
+    return { t, boxes };
+  });
+};
+
+/** Motion energy (mean abs diff of small grayscale frames) and content spread, scanned in-page. */
+window.qaScan = (fps = 15, w = 72) => {
+  const h = Math.round(w * film.H / film.W);
+  const c = document.createElement('canvas'); c.width = w; c.height = h;
+  const x = c.getContext('2d', { willReadFrequently: true });
+  const N = Math.floor(film.duration * fps), energy = [], std = [];
+  const grain0 = film.spec.grain; film.spec.grain = 0;   // grain is texture, not motion
+  let prev = null;
+  for (let i = 0; i <= N; i++) {
+    film.seek(Math.min(film.duration - 1e-3, i / fps));
+    x.drawImage(canvas, 0, 0, w, h);
+    const d = x.getImageData(0, 0, w, h).data, g = new Float32Array(w * h);
+    let m = 0;
+    for (let k = 0; k < w * h; k++) { g[k] = 0.299 * d[k * 4] + 0.587 * d[k * 4 + 1] + 0.114 * d[k * 4 + 2]; m += g[k]; }
+    m /= w * h;
+    let v = 0; for (let k = 0; k < w * h; k++) v += (g[k] - m) ** 2;
+    std.push(+Math.sqrt(v / (w * h)).toFixed(2));
+    if (prev) { let e = 0; for (let k = 0; k < w * h; k++) e += Math.abs(g[k] - prev[k]); energy.push(+(e / (w * h)).toFixed(3)); } else energy.push(0);
+    prev = g;
+  }
+  film.spec.grain = grain0;
+  return { fps, energy, std };
+};
+
+/** Synthesized score + sound effects for the film, as base64 WAV. */
+window.score = async () => renderScore(film.spec, film.cues(), film.duration);
+window.cues = () => film.cues();
+
+window.__ready = true;
+</script>
+</body>
+</html>

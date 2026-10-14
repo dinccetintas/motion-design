@@ -1,0 +1,30 @@
+{
+  "title": "QA: every scene",
+  "format": "9:16",
+  "style": "swiss",
+  "music": { "mood": "drive", "bpm": 120, "seed": 3 },
+  "brand": { "name": "Northwind", "url": "northwind.dev" },
+  "scenes": [
+    { "type": "title", "ground": "dark", "props": { "text": "Ship *faster* than ever", "sub": "The release platform for modern teams" } },
+    { "type": "statement", "ground": "light", "transition": "panel", "props": { "text": "Every release used to take *three weeks* of meetings and spreadsheets" } },
+    { "type": "counter", "ground": "dark", "transition": "wipe", "props": { "value": 87, "suffix": "%", "label": "of deploys now go out *on Friday*" } },
+    { "type": "stack", "ground": "accent", "transition": "slice", "props": { "title": "What changed", "items": ["One-click rollbacks", "Preview *every* branch", "Zero config"] } },
+    { "type": "swap", "ground": "light", "transition": "push", "props": { "prefix": "Built for", "words": ["speed", "teams", "scale", "you"] } },
+    { "type": "marquee", "ground": "dark", "transition": "cut", "props": { "words": ["BUILD", "SHIP", "REPEAT"] } },
+    { "type": "bars", "ground": "light", "transition": "stack", "props": { "title": "Deploy time, minutes", "items": [{"label":"Legacy CI","value":42},{"label":"Competitor","value":19},{"label":"Northwind","value":3}], "unit": "m" } },
+    { "type": "linechart", "ground": "dark", "transition": "zoom", "props": { "title": "Weekly releases", "points": [3,4,4,6,9,12,18,27,41], "value": "+1,266%", "label": "Jan to Sep 2026" } },
+    { "type": "compare", "ground": "dark", "transition": "split", "props": { "title": "Rollback time", "left": {"label":"Before","value":"45 min"}, "right": {"label":"With Northwind","value":"8 sec"} } },
+    { "type": "quote", "ground": "light", "transition": "panel", "props": { "text": "We cut our release cycle from weeks to *minutes* and nobody misses the old way.", "author": "Ada Park", "role": "VP Eng, Lumen" } },
+    { "type": "tunnel", "ground": "dark", "transition": "iris", "props": { "words": ["Plan", "Build", "Test", "Ship"] } },
+    { "type": "justify", "ground": "light", "transition": "cut", "props": { "lines": ["Less", "waiting", "*more*", "shipping"] } },
+    { "type": "timeline", "ground": "dark", "transition": "wipe", "props": { "title": "Our story", "items": [{"label":"2021","text":"Two founders, one CLI"},{"label":"2023","text":"10,000 teams"},{"label":"2026","text":"Every Fortune 500"}] } },
+    { "type": "grid", "ground": "accent", "transition": "iris", "props": { "text": "Feel the rhythm" } },
+    { "type": "orbit", "ground": "dark", "transition": "push", "props": { "center": "Northwind", "items": ["GitHub", "Slack", "Linear", "AWS", "Vercel", "Datadog"] } },
+    { "type": "globe", "ground": "dark", "transition": "cut", "props": { "value": "120+ countries", "label": "Teams shipping with Northwind right now" } },
+    { "type": "chapter", "ground": "light", "transition": "panel", "props": { "index": "02", "title": "The *future* of release" } },
+    { "type": "code", "ground": "light", "transition": "wipe", "props": { "title": "Three lines to ship", "code": "import { ship } from 'northwind'\n\n// deploy every branch\nawait ship({ preview: true })\nawait ship.promote('main')" } },
+    { "type": "screen", "ground": "light", "transition": "stack", "props": { "title": "See it live", "url": "northwind.dev", "focus": [0.5, 0.35] } },
+    { "type": "image", "ground": "dark", "transition": "cut", "props": { "caption": "Made for *makers*" } },
+    { "type": "endcard", "ground": "accent", "transition": "zoom", "props": { "name": "Northwind", "tagline": "Ship faster than ever", "cta": "Start free", "url": "northwind.dev" } }
+  ]
+}
