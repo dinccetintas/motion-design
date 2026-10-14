@@ -102,16 +102,14 @@
     }
    },
    {
-    "type": "tunnel",
+    "type": "flap",
     "beats": 6,
     "ground": "dark",
     "transition": "iris",
     "props": {
-     "words": [
-      "Write",
-      "Design",
-      "Score",
-      "Cut"
+     "lines": [
+      "PASTE A LINK",
+      "*GET A FILM*"
      ]
     }
    },
@@ -131,13 +129,13 @@
  },
  "qa": {
   "scores": {
-   "hook": 8.5,
+   "hook": 10,
    "readability": 10,
    "motion": 10,
    "variety": 10,
    "brand": 10,
-   "sync": 9
+   "sync": 8.9
   },
-  "overall": 9.6
+  "overall": 9.8
  }
 }

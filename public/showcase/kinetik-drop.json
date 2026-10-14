@@ -56,6 +56,19 @@
     }
    },
    {
+    "type": "flap",
+    "beats": 6,
+    "ground": "dark",
+    "transition": "slice",
+    "props": {
+     "lines": [
+      "DROP 01",
+      "FRI 10:00",
+      "*ONLINE ONLY*"
+     ]
+    }
+   },
+   {
     "type": "stack",
     "beats": 6,
     "ground": "light",

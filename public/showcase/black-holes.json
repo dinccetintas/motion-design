@@ -37,6 +37,17 @@
     }
    },
    {
+    "type": "highlight",
+    "beats": 8,
+    "ground": "light",
+    "transition": "panel",
+    "props": {
+     "text": "Near a black hole, gravity is so strong that time itself slows down. To a distant observer, a clock falling toward the horizon ticks slower and slower, and never quite seems to cross.",
+     "mark": "time itself slows down",
+     "source": "General relativity, 1915"
+    }
+   },
+   {
     "type": "counter",
     "beats": 6,
     "ground": "dark",
@@ -49,7 +60,7 @@
    },
    {
     "type": "compare",
-    "beats": 7,
+    "beats": 8,
     "ground": "dark",
     "transition": "slice",
     "props": {
@@ -131,11 +142,11 @@
  "qa": {
   "scores": {
    "hook": 10,
-   "readability": 9,
+   "readability": 10,
    "motion": 10,
-   "variety": 10,
+   "variety": 9.4,
    "brand": 9,
-   "sync": 8.9
+   "sync": 8.5
   },
   "overall": 9.5
  }

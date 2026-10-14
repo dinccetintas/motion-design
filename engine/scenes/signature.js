@@ -38,17 +38,42 @@ function flapTile(g, x, y, w, h, from, to, f, ink, tile, seam) {
   g.rect(x, mid - Math.max(1, h * 0.012), w, Math.max(2, h * 0.024), seam);
 }
 
+/** Re-flow the message onto the board shape that gives the biggest tiles: a tall frame stacks
+ *  words on more rows, a wide one keeps each line whole. Never splits a word. */
+function flapLayout(g, src, box) {
+  const gap = g.u * 0.9, maxLen = Math.max(4, ...src.map((l) => l.text.length));
+  const longestWord = Math.max(3, ...src.flatMap((l) => l.text.split(' ').map((w) => w.length)));
+  let best = null;
+  for (let c = longestWord; c <= maxLen; c++) {
+    const lines = [];
+    for (const l of src) {
+      let row = '';
+      for (const w of l.text.split(' ').filter(Boolean)) {
+        if (row && (row + ' ' + w).length > c) { lines.push({ text: row, accent: l.accent }); row = w; } else row = row ? row + ' ' + w : w;
+      }
+      lines.push({ text: row, accent: l.accent });
+    }
+    if (lines.length > 6) continue;
+    // No orphans: a broken line never leaves a one- or two-letter row ("A", "01").
+    if (lines.length > src.length && lines.some((l) => l.text.length < 3)) continue;
+    const cols = Math.max(4, c), rows = lines.length;
+    const tw = Math.min((box.w - gap * (cols - 1)) / cols, ((box.h * 0.78 - (rows - 1) * gap * 2.2) / rows) / 1.45);
+    // Bigger tiles win, but every extra break costs: the board should still read as the lines written.
+    const score = tw * Math.pow(0.88, rows - src.length);
+    if (!best || score > best.score) best = { lines, cols, tw, gap, score };
+  }
+  return best;
+}
+
 export const flap = {
   beats: 6,
   describe: 'Split-flap departure board: every tile flips through letters and lands on the message. Dates, times, launches, places, codes. 1-3 short lines.',
   props: { lines: 'array of 1-3 lines, <= 12 characters each; wrap one line in *asterisks* for the accent color' },
   draw(g, p, lt, S) {
     const P = palette(g, S), box = g.safe;
-    const lines = arr(p.lines).slice(0, 3).map((l) => ({ text: String(l).replace(/\*/g, '').toUpperCase().slice(0, 14), accent: /\*/.test(l) }));
-    const cols = Math.max(4, ...lines.map((l) => l.text.length)), rows = lines.length || 1;
-    const gap = g.u * 0.9;
-    const tw = Math.min((box.w - gap * (cols - 1)) / cols, (box.h * 0.7 / rows) / 1.45);
-    const th = tw * 1.45;
+    const src = arr(p.lines).slice(0, 3).map((l) => ({ text: String(l).replace(/\*/g, '').toUpperCase().slice(0, 14), accent: /\*/.test(l) }));
+    const { lines, cols, tw, gap } = flapLayout(g, src, box);
+    const rows = lines.length || 1, th = tw * 1.45;
     const totalW = cols * tw + (cols - 1) * gap, totalH = rows * th + (rows - 1) * gap * 2.2;
     const x0 = box.x + (box.w - totalW) / 2, y0 = box.y + (box.h - totalH) * 0.45;
     const tile = S.ground === 'dark' ? '#1C1C1E' : '#141416', seam = S.ground === 'dark' ? '#0A0A0A' : '#050505';
@@ -77,9 +102,9 @@ export const flap = {
     });
   },
   cues(p, S) {
-    const out = [], lines = arr(p.lines);
-    lines.forEach((l, r) => { for (let k = 0; k < 10; k++) out.push({ t: r * 0.18 + k * 0.055, sfx: 'key', gain: 0.35 }); });
-    out.push({ t: lines.length * 0.18 + 0.9, sfx: 'click', gain: 0.6 });
+    const out = [], rows = Math.min(6, arr(p.lines).reduce((a, l) => a + Math.max(1, Math.ceil(String(l).replace(/\*/g, '').length / 8)), 0));
+    for (let r = 0; r < rows; r++) for (let k = 0; k < 10; k++) out.push({ t: r * 0.18 + k * 0.055, sfx: 'key', gain: 0.3 });
+    out.push({ t: rows * 0.18 + 0.9, sfx: 'click', gain: 0.6 });
     return out;
   },
 };
@@ -101,8 +126,8 @@ export const highlight = {
     for (let i = 0; i + mw.length <= plainWords.length && mw.length; i++) if (mw.every((m, j) => eq(plainWords[i + j], m, j))) { ms = i; break; }
     words.forEach((w, i) => { w.accent = ms >= 0 && i >= ms && i < ms + mw.length; });
     const area = { ...box, h: box.h * (p.source ? 0.82 : 0.9) };
-    const L = g.fit(words, area, { role: 'text', maxLines: g.portrait ? 13 : 7, maxSize: g.u * (g.portrait ? 10.5 : 8.5), lineHeight: 1.28, weight: 500 });
-    const oy = box.y + (area.h - L.h) * 0.4;
+    const L = g.fit(words, area, { role: 'text', maxLines: g.portrait ? 13 : 9, maxSize: g.u * (g.portrait ? 10.5 : 8.5), lineHeight: 1.28, weight: 500 });
+    const oy = box.y + (area.h - L.h) * 0.5;
     const sweep0 = Math.min(S.dur * 0.42, S.beat * 4), dim = ew(lt, sweep0 + 0.6, 0.6, ease.outCubic);
     const hl = g.style.grounds.accent.bg, onHl = g.style.grounds.accent.ink;
     // Marker strokes behind the marked words, line by line.

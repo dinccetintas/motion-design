@@ -14,7 +14,7 @@
  },
  "showcase": {
   "order": 2,
-  "from": "a topic: \u201cHow black holes bend time\u201d"
+  "from": "a topic: “How black holes bend time”"
  },
  "scenes": [
   {
@@ -33,6 +33,17 @@
    "transition": "wipe",
    "props": {
     "text": "Past the event horizon nothing escapes. Not even *light*."
+   }
+  },
+  {
+   "type": "highlight",
+   "beats": 8,
+   "ground": "light",
+   "transition": "panel",
+   "props": {
+    "text": "Near a black hole, gravity is so strong that time itself slows down. To a distant observer, a clock falling toward the horizon ticks slower and slower, and never quite seems to cross.",
+    "mark": "time itself slows down",
+    "source": "General relativity, 1915"
    }
   },
   {
