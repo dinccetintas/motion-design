@@ -72,7 +72,7 @@ npm test
 
 | Path | What |
 |---|---|
-| `engine/` | The film engine: `film.js` (timeline, transitions, camera, grain), `gfx.js` (type fitting, probes), `kinetic.js` (kinetic type), `scenes/` (21 scene types), `styles.js` (10 style packs), `transitions.js`, `schema.js` (FilmSpec JSON schema), `audio/` (pure-JS DSP synth and arranger). |
+| `engine/` | The film engine: `film.js` (timeline, transitions, camera, grain), `gfx.js` (type fitting, probes), `kinetic.js` (kinetic type), `scenes/` (26 scene types, including the signature split-flap, marker, assemble, phone and photo-plate scenes), `styles.js` (10 style packs), `transitions.js`, `schema.js` (FilmSpec JSON schema), `audio/` (pure-JS DSP synth and arranger). |
 | `server/` | `index.js` (HTTP + SSE), `agents/` (prompts, pipeline, offline director), `ingest.js`, `renderer.js` (parallel frame rendering, motion blur, ffmpeg, loudnorm), `qa.js` (the critic's measurements), `llm.js`. |
 | `public/` | Landing (`index.html`), studio (`studio.html`), CSS, the player, rail and inspector, vendored fonts, published showcase films. |
 | `films/` | Hand-directed film specs, including the showreel. |
