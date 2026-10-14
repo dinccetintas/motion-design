@@ -23,8 +23,7 @@ export class Rail extends EventTarget {
       const f = document.createElement('div');
       f.className = 'rframe' + (marks[i] ? ' ' + marks[i] : '');
       f.dataset.i = i;
-      f.innerHTML = `<div class="cell"><canvas></canvas><span class="no">${String(i + 1).padStart(2, '0')}</span></div><span class="ttl"><span>${s.type}</span><i class="mark"></i></span>`;
-      f.title = `Scene ${i + 1}: ${s.type}, ${s.beats} beats`;
+      f.innerHTML = `<div class="cell"><canvas></canvas></div><span class="ttl"><span>${s.type}</span><i class="mark"></i></span>`;
       this.framesEl.appendChild(f);
       this._markTitle(f, i);
       return f;
@@ -70,16 +69,26 @@ export class Rail extends EventTarget {
   _markTitle(f, i) {
     const m = this.marks?.[i], el = f.querySelector('.mark');
     el.title = m === 'ok' ? 'Approved by the critic' : m === 'issue' ? 'The critic flagged this scene' : '';
+    const s = this.tl[i];
+    f.title = `Scene ${i + 1}: ${s.type}, ${s.beats} beats${el.title ? ' • ' + el.title : ''}`;
   }
 
   layout() {
     if (!this.tl.length) return;
     const beats = this.tl.reduce((a, s) => a + s.beats, 0);
-    const avail = this.scroll.clientWidth - 76;
+    const avail = this.scroll.clientWidth - 96;   // scroll padding, inner padding, end margin
     this.pitch = Math.max(14, avail / beats);
     const width = beats * this.pitch;
     this.inner.style.width = width + 'px';
     this.frames.forEach((f, i) => { f.style.width = this.tl[i].beats * this.pitch + 'px'; });
+    // Labels shrink to fit their cell before they ever truncate.
+    for (const f of this.frames) {
+      const t = f.querySelector('.ttl span'); t.style.fontSize = ''; f.classList.remove('tight');
+      const shrink = () => { for (let px = 11; px > 8.5 && t.scrollWidth > t.clientWidth; px -= 0.5) t.style.fontSize = px + 'px'; };
+      shrink();
+      // Still too long: the name wins over the mark (the verdict stays in the tooltip and the Review tab).
+      if (t.scrollWidth > t.clientWidth) { f.classList.add('tight'); t.style.fontSize = ''; shrink(); }
+    }
     // Ruler: a tick per beat, a long tick and number per bar.
     const frag = document.createDocumentFragment();
     for (let b = 0; b <= beats; b++) {

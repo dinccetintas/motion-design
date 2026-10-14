@@ -92,6 +92,17 @@ export function filmForm(el, spec, moods, onChange) {
     <p class="hint" style="margin-top:8px"><button type="button" class="chip" id="reset-colors">Use style colors</button></p>
     <h3 class="label">Music</h3>
     <div class="moods">${moods.map((m) => `<button type="button" class="mood-opt" data-mood="${m.id}" aria-pressed="${spec.music?.mood === m.id}"><b>${m.name}</b><span>${m.bpm} bpm</span></button>`).join('')}</div>`;
+  // Each style's name is set in its own display face; shrink it to its card, never break a word.
+  const fitSamples = () => el.querySelectorAll('.style-opt .sample').forEach((n) => {
+    if (!n.clientWidth) return;
+    n.style.fontSize = '';
+    for (let px = 19; px > 11 && n.scrollWidth > n.clientWidth; px -= 1) n.style.fontSize = px + 'px';
+  });
+  fitSamples(); document.fonts?.ready.then(fitSamples);
+  // The film tab can be hidden while it renders: fit again whenever it gets a size.
+  new ResizeObserver(fitSamples).observe(el.querySelector('.styles'));
+  el._fit = fitSamples;   // latest form's fitter; one listener refits after late font loads
+  if (!el._fontHook) { el._fontHook = true; document.fonts?.addEventListener('loadingdone', () => el._fit?.()); }
   const commit = (mut, note) => { const s = structuredClone(spec); mut(s); onChange(s, note); };
   el.querySelectorAll('[data-style]').forEach((b) => (b.onclick = () => commit((s) => { s.style = b.dataset.style; s.accentStyle = STYLES[s.style].accentStyle; }, `Style: ${STYLES[b.dataset.style].name}`)));
   el.querySelectorAll('[data-mood]').forEach((b) => (b.onclick = () => commit((s) => { s.music = { ...(s.music || {}), mood: b.dataset.mood }; delete s.music.bpm; }, `Music: ${b.dataset.mood}`)));

@@ -32,6 +32,9 @@
   /* One sprocket hole, repeated along rails. */
   --perf: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='28' height='16'><rect x='7' y='3' width='14' height='10' rx='2.5' fill='%230A0A0A'/></svg>");
 
+  /* Torn tape ends, for tape labels. */
+  --torn: polygon(0 10%, 3px 0, 30% 6%, 60% 0, calc(100% - 3px) 5%, 100% 0, 100% 90%, calc(100% - 4px) 100%, 70% 94%, 35% 100%, 4px 95%, 0 100%);
+
   color-scheme: dark;
 }
 
@@ -100,10 +103,11 @@ button, input, textarea, select { font: inherit; color: inherit; }
 .field:focus { outline: none; border-color: var(--orange); }
 
 /* ---- Marks: state is a mark, not a hue ------------------------------------ */
-.flag { /* folded tape flag */
-  width: 22px; height: 30px; background: var(--orange); background-image: var(--grain); background-blend-mode: multiply;
+.flag { /* folded tape flag: ink tape, its orange fold on top. The same mark on every surface. */
+  position: relative; width: 22px; height: 30px; background: var(--ink);
   clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 74%, 0 100%);
 }
+.flag::after { content: ''; position: absolute; inset: 0 0 auto 0; height: 28%; background: var(--orange); background-image: var(--grain); background-blend-mode: multiply; }
 .cross { /* grease-pencil cross: approved */
   width: 18px; height: 18px; flex: none;
   background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'><path d='M3 3.5 L17 16.5 M16.5 3 L3.5 17' stroke='%23F4F1EA' stroke-width='3.2' stroke-linecap='round' fill='none'/></svg>") center / contain no-repeat;

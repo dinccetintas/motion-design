@@ -42,9 +42,18 @@ async function body(req) {
 }
 
 /** A small still of the film for project lists. */
+// Thumbnails are made one at a time; projects listed without one get theirs made in the background.
+let thumbChain = Promise.resolve();
+const thumbPending = new Set();
+function queueThumb(id) {
+  if (thumbPending.has(id)) return;
+  thumbPending.add(id);
+  thumbChain = thumbChain.then(() => makeThumb(id)).catch(() => {}).finally(() => thumbPending.delete(id));
+}
 async function makeThumb(id) {
   const p = store.load(id); if (!p?.spec) return;
-  const P = plan(p.spec), s0 = P.scenes[0];
+  // The first scene that holds a readable picture: tunnels, marquees and grids are mostly motion.
+  const P = plan(p.spec), s0 = P.scenes.find((s) => !['tunnel', 'marquee', 'grid', 'chapter'].includes(s.type)) || P.scenes[0];
   const out = join(store.dirOf(id), 'thumb.png');
   await contactSheet(p.spec, out, { times: [s0 ? s0.start + s0.dur * 0.8 : 0.5], cols: 1, scale: 0.12 }).catch(() => null);
   const fresh = store.load(id); fresh.thumb = `/data/projects/${id}/thumb.png?v=${Date.now()}`; store.save(fresh);
@@ -58,7 +67,7 @@ function startRun(p, message) {
   emit(p.id, { agent: 'studio', state: 'start', text: message, at: Date.now() });
   run(p, message, (ev) => emit(p.id, ev))
     .catch((e) => { console.error(e); emit(p.id, { agent: 'studio', state: 'error', text: friendly(e), at: Date.now() }); })
-    .finally(() => { j.busy = false; emit(p.id, { agent: 'studio', state: 'idle', at: Date.now() }); makeThumb(p.id).catch(() => {}); });
+    .finally(() => { j.busy = false; emit(p.id, { agent: 'studio', state: 'idle', at: Date.now() }); queueThumb(p.id); });
   return true;
 }
 const friendly = (e) => /net::|ERR_|Timeout|timeout/.test(e.message) ? `Could not load that page (${e.message.split('\n')[0].slice(0, 120)}). Check the URL or paste the text instead.` : e.message.slice(0, 300);
@@ -114,7 +123,7 @@ const routes = [
     moods: Object.entries(MOODS).map(([id, m]) => ({ id, name: m.name, bpm: m.bpm, desc: m.desc })),
   })],
   ['GET', /^\/api\/showcase$/, (req, res) => send(res, 200, showcase())],
-  ['GET', /^\/api\/projects$/, (req, res) => send(res, 200, store.list())],
+  ['GET', /^\/api\/projects$/, (req, res) => { const l = store.list(); l.filter((p) => !p.thumb && p.format).slice(0, 9).forEach((p) => queueThumb(p.id)); send(res, 200, l); }],
   ['POST', /^\/api\/projects$/, async (req, res) => {
     const b = await body(req);
     if (b.showcase) { // Remix: start a project from a published showcase film.
@@ -123,7 +132,7 @@ const routes = [
       const p = store.create({ title: f.title, spec: f.spec, qa: { scores: f.qa.scores, overall: f.qa.overall, issues: [] }, messages: [{ role: 'studio', text: `Remixing “${f.title}”. Tell the crew what to change.`, at: Date.now() }] });
       p.versions.push({ at: Date.now(), spec: f.spec, qa: f.qa, note: 'Remixed from the showreel' });
       store.save(p);
-      makeThumb(p.id).catch(() => {});
+      queueThumb(p.id);
       return send(res, 201, { id: p.id });
     }
     const msg = String(b.message || '').trim();

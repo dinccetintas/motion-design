@@ -1,5 +1,9 @@
 // Landing: the hero rail cuts a showcase film live; the reel plays from the same engine.
 import { Player, thumbnails, timecode } from '/js/player.js';
+import { SCENES } from '/engine/scenes/index.js';
+import { STYLES } from '/engine/styles.js';
+import { MOODS } from '/engine/audio/score.js';
+import { FORMATS } from '/engine/film.js';
 
 const $ = (s, el = document) => el.querySelector(s);
 const AR = { '9:16': '9 / 16', '16:9': '16 / 9', '1:1': '1 / 1', '4:5': '4 / 5' };
@@ -36,6 +40,10 @@ for (const b of document.querySelectorAll('.try')) b.addEventListener('click', (
 $('#crew-list').innerHTML = CREW.map(([role, what, sample], i) => `
   <li><span class="no mono">${String(i + 1).padStart(2, '0')}</span><div class="trim"><h3 class="role cond">${role}</h3><p>${what}</p><p class="sample">${sample}</p></div></li>`).join('');
 
+// The bench counts what the engine actually has.
+const COUNTS = { scenes: SCENES, styles: STYLES, moods: MOODS, formats: FORMATS };
+document.querySelectorAll('[data-count]').forEach((el) => { el.textContent = String(Object.keys(COUNTS[el.dataset.count] || {}).length || el.textContent); });
+
 // ---- Showcase data ------------------------------------------------------------------------
 const reel = await api('/api/showcase').catch(() => []);
 
@@ -60,7 +68,7 @@ if (hero) {
   const tl = player.film.timeline(), beat = player.film.beat;
   $('#hero-title').textContent = hero.title;
   // Academy leader before the first frame, so the rail never runs into empty orange.
-  for (const n of [3, 2, 1]) track.insertAdjacentHTML('beforeend', `<div class="cell-col leader-col"><div class="cell-ruler"><b>${n}</b></div><div class="frame-cell leader" style="--ar:${AR[hero.spec.format] || '9 / 16'}"><span class="leader-n">${n}</span></div></div>`);
+  for (const n of [3, 2, 1]) track.insertAdjacentHTML('beforeend', `<div class="cell-col leader-col"><div class="cell-ruler"></div><div class="frame-cell leader" style="--ar:${AR[hero.spec.format] || '9 / 16'}"><span class="leader-n">${n}</span></div></div>`);
   const cells = tl.map((s, i) => {
     const col = document.createElement('div'); col.className = 'cell-col';
     // A numbered ruler that travels with its frame: one tick per beat of the scene.
@@ -69,9 +77,9 @@ if (hero) {
     c.appendChild(thumbs[i]);
     col.appendChild(c); track.appendChild(col); return c;
   });
-  // Scenes already cut hang on pins below the rail.
+  // Scenes already cut hang taped to a bar below the rail.
   const bin = $('#hero-bin');
-  bin.innerHTML = tl.map((s, i) => `<li data-i="${i}"><span class="pin" aria-hidden="true"></span><span class="string" aria-hidden="true"></span><span class="trimcell"></span><span class="mono">${String(i + 1).padStart(2, '0')}</span></li>`).join('');
+  bin.innerHTML = tl.map((s, i) => `<li data-i="${i}"><span class="tape" aria-hidden="true"></span><span class="trimcell"></span><span class="mono">${String(i + 1).padStart(2, '0')}</span></li>`).join('');
   [...bin.children].forEach((li, i) => li.querySelector('.trimcell').appendChild(hung[i]));
   let active = -1;
   const setActive = (i) => {
@@ -118,9 +126,9 @@ for (const f of reel) {
   fig.className = 'reel-item';
   fig.style.setProperty('--arn', String(aw / ah));
   const pass = Object.values(f.qa.scores).every((v) => v >= 8);
-  fig.innerHTML = `<div class="win"><canvas></canvas><span class="play-state mono">${f.spec.format}</span></div>
+  fig.innerHTML = `<div class="win"><canvas></canvas></div>
     <div class="meta"><h3 class="cond">${f.title}</h3><a class="tab small ghost" href="/studio?showcase=${encodeURIComponent(f.id)}">Remix</a></div>
-    <p class="from">Made from ${f.from}</p>
+    <p class="from">Made from ${f.from}<span class="fmt mono">· ${f.spec.format}</span></p>
     <p class="verdict">${pass ? '<span class="cross" aria-hidden="true"></span><span class="ok">Approved</span>' : '<span class="ok">In review</span>'}<span class="mono">${f.qa.overall.toFixed(1)}</span><span class="dim">${pass ? 'every axis 8 or above' : ''}</span></p>`;
   grid.appendChild(fig);
   const p = new Player(fig.querySelector('canvas'), { audio: false, loop: true, scale: f.spec.format === '16:9' ? 0.5 : 0.4 });

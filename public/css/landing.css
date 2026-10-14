@@ -23,22 +23,22 @@
 .composer-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
 .tries { display: flex; gap: 8px; align-items: center; }
 .tries::before { content: 'Try'; font-family: var(--f-cond); font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; font-size: 13px; color: var(--dim); margin-right: 4px; }
-.try {
-  border: 1px solid var(--rule); background: transparent; border-radius: 2px; padding: 7px 12px; cursor: pointer;
-  font-family: var(--f-cond); font-weight: 700; font-size: 14px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--white-2);
-  transition: border-color 160ms ease, color 160ms ease, transform 160ms var(--ease-out);
+.try { /* a strip of white tape with torn ends, lettered in ink */
+  border: 0; background: var(--white-2); color: var(--ink); padding: 7px 14px; cursor: pointer;
+  clip-path: var(--torn);
+  font-family: var(--f-cond); font-weight: 800; font-size: 14px; letter-spacing: 0.08em; text-transform: uppercase;
+  transition: background-color 160ms ease, transform 160ms var(--ease-out);
 }
 .try:active { transform: scale(0.97); }
-@media (hover: hover) { .try:hover { border-color: var(--orange); color: var(--orange); } }
+@media (hover: hover) and (pointer: fine) { .try:hover { background: var(--orange); } }
 
 .hero-rail { min-width: 0; }
 .rail-band { border-radius: 6px; overflow: hidden; position: relative; }
 .rail-band .perf-row { margin: 10px 0; }
 .strip { position: relative; height: clamp(400px, 56svh, 600px); overflow: hidden; }
-/* The tape flag marks the playhead: orange tape folded over the band, shaded so it reads on orange. */
-.strip > .flag { position: absolute; top: 0; left: 50%; z-index: 3; width: 28px; height: 40px; transform: translateX(-50%);
-  background-color: var(--orange-hot); filter: drop-shadow(0 3px 2px rgba(0,0,0,.45)); }
-.strip > .flag::after { content: ''; position: absolute; inset: 0 0 auto 0; height: 9px; background: rgba(0,0,0,.28); }
+/* The tape flag marks the playhead. */
+.strip > .flag { position: absolute; top: 0; left: 50%; z-index: 3; width: 28px; height: 40px; transform: translateX(-50%); }
+.strip > .flag::after { background-color: var(--white); background-image: none; }
 .strip-track { position: absolute; top: 0; bottom: 0; left: 50%; display: flex; align-items: stretch; gap: 16px; will-change: transform; }
 .cell-col { display: grid; grid-template-rows: 30px minmax(0, 1fr); gap: 6px; flex: none; padding-bottom: 10px; }
 .cell-ruler { position: relative; display: flex; align-items: flex-end; justify-content: space-between; gap: 2px; color: rgba(10, 10, 10, 0.78); border-bottom: 1.5px solid currentColor; padding: 0 2px; }
@@ -59,8 +59,8 @@
 .bin { list-style: none; margin: 0; padding: 22px 6px 4px; display: flex; gap: 10px; position: relative; overflow: hidden; }
 .bin::before { content: ''; position: absolute; left: 0; right: 0; top: 9px; height: 2px; background: var(--spool); }
 .bin li { position: relative; display: grid; justify-items: center; gap: 4px; padding-top: 14px; transform-origin: 50% -6px; transition: opacity 300ms ease, transform 400ms var(--ease-out); }
-.bin li .pin { position: absolute; top: -18px; left: 50%; margin-left: -5px; }
-.bin li .string { position: absolute; top: -9px; left: 50%; width: 1.5px; height: 22px; background: var(--rule); }
+.bin li .tape { position: absolute; top: -16px; left: 50%; width: 26px; height: 22px; margin-left: -13px; background: rgba(230, 225, 214, 0.82); clip-path: var(--torn); transform: rotate(-3deg); z-index: 1; }
+.bin li:nth-child(even) .tape { transform: rotate(2.5deg); }
 .bin li .trimcell { display: block; border: 3px solid var(--white); border-radius: 2px; overflow: hidden; height: 64px; background: var(--ink); }
 .bin li .trimcell canvas { height: 100%; width: auto; }
 .bin li .mono { font-size: 10px; color: var(--dim); }
@@ -69,7 +69,8 @@
 .bin li[data-state="now"] .trimcell { border-color: var(--orange); }
 .bin li:nth-child(odd)[data-state="cut"] { transform: rotate(-2deg); }
 .bin li:nth-child(even)[data-state="cut"] { transform: rotate(1.5deg); }
-.rail-meta { display: flex; align-items: center; gap: 18px; margin-top: 14px; }
+.rail-meta { display: flex; align-items: center; gap: 18px; margin-top: 14px; white-space: nowrap; }
+.rail-meta .label { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 .rail-meta .label { margin-right: auto; color: var(--white-2); }
 
 /* ---- Sections -------------------------------------------------------------------- */
@@ -87,12 +88,12 @@ section { padding: 112px 40px 96px; max-width: 1680px; margin: 0 auto; }
 .reel-item { flex: none; display: grid; gap: 12px; scroll-snap-align: start; width: calc(var(--h) * var(--arn)); --h: min(560px, 62svh); }
 .reel-item .win { position: relative; height: var(--h); border-radius: 3px; overflow: hidden; background: var(--ink); border: 8px solid var(--white); box-sizing: content-box; }
 .reel-item .win canvas { width: 100%; height: 100%; }
-.reel-item h3 { margin: 0; font-size: 24px; }
+.reel-item h3 { margin: 0; font-size: 24px; min-height: calc(2 * 0.92em); }
 .reel-item .from { margin: 0; color: var(--dim); font-size: 15px; max-width: 46ch; }
-.reel-item .meta { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.reel-item .meta { display: flex; justify-content: space-between; align-items: start; gap: 12px; }
+.reel-item .fmt { color: var(--white-2); margin-left: 6px; }
 .reel-item .verdict { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--white-2); margin: 0; }
 .reel-item .verdict .ok { font-family: var(--f-cond); font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; font-size: 13px; }
-.reel-item .play-state { position: absolute; left: 10px; bottom: 10px; font: 600 11px/1 var(--f-mono); background: rgba(10,10,10,.82); color: var(--white); padding: 5px 7px; border-radius: 2px; }
 
 /* The crew: six punched-white frames in working order on one strip */
 .crew-strip { background: var(--char); border-radius: 4px; padding: 0 16px; }
@@ -103,7 +104,8 @@ section { padding: 112px 40px 96px; max-width: 1680px; margin: 0 auto; }
 .crew-list .trim { background: var(--white); color: var(--ink); border-radius: 2px; padding: 18px 16px 20px; min-height: 270px; display: grid; align-content: start; gap: 10px; }
 .crew-list .trim .role { font-size: 26px; color: var(--ink); }
 .crew-list .trim p { margin: 0; font-size: 15px; line-height: 1.5; color: #2b2925; }
-.crew-list .trim .sample { margin-top: auto; padding-top: 12px; border-top: 1.5px dashed #c9c3b6; font-size: 14px; font-weight: 600; color: var(--orange-deep); }
+.crew-list .trim .sample { margin-top: auto; padding-top: 12px; border-top: 1.5px dashed #c9c3b6; font-size: 14px; font-weight: 600; color: #4a4741; display: flex; gap: 8px; align-items: baseline; }
+.crew-list .trim .sample::before { content: ''; flex: none; width: 7px; height: 7px; background: var(--orange); transform: translateY(-1px); }
 
 /* Measured: dense tabular numerals */
 .measure-sheet { border-radius: 3px; padding: 8px 28px 24px; }
@@ -115,7 +117,7 @@ section { padding: 112px 40px 96px; max-width: 1680px; margin: 0 auto; }
 .mrow.head .short { display: none; }
 .mrow { display: grid; grid-template-columns: minmax(0, 3fr) repeat(7, minmax(0, 1fr)); align-items: center; gap: 12px; padding: 14px 0; border-bottom: 1px solid var(--spool); }
 .mrow.head { color: var(--dim); }
-.mrow.head .n { font-size: 12px; letter-spacing: 0.04em; overflow-wrap: anywhere; }
+.mrow.head .n { font-size: 12px; letter-spacing: 0.04em; white-space: nowrap; }
 .mrow .film { font-family: var(--f-cond); font-weight: 800; font-size: 22px; text-transform: uppercase; }
 .mrow .n { font-family: var(--f-mono); font-variant-numeric: tabular-nums; font-size: 20px; text-align: right; }
 .mrow .n.low { color: var(--orange); }
@@ -123,7 +125,7 @@ section { padding: 112px 40px 96px; max-width: 1680px; margin: 0 auto; }
 .measure-note { margin-top: 18px; font-size: 14px; color: var(--dim); max-width: 68ch; }
 
 /* The bench: a call sheet, label | value | note */
-.specs { margin: 0; border-top: 1px solid var(--rule); }
+.specs { margin: 0; }
 .specs > div { display: grid; grid-template-columns: 200px 160px minmax(0, 1fr); align-items: baseline; gap: 24px; padding: 18px 0; border-bottom: 1px solid var(--spool); }
 .specs dt { color: var(--dim); }
 .specs dd { margin: 0; font-size: 40px; font-family: var(--f-mono); font-weight: 600; text-transform: none; letter-spacing: -0.02em; }
@@ -132,7 +134,7 @@ section { padding: 112px 40px 96px; max-width: 1680px; margin: 0 auto; }
 /* Close */
 .close { max-width: none; padding: 0; margin-top: 64px; }
 .close .perf-row { margin: 12px 0; }
-.close-inner { max-width: 1680px; margin: 0 auto; padding: 72px 40px 80px; display: grid; grid-template-columns: minmax(0, 6fr) minmax(0, 6fr); gap: 48px; align-items: end; }
+.close-inner { max-width: 1680px; margin: 0 auto; padding: 72px 40px 80px; display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 48px; align-items: end; }
 .close h2 { margin: 0; font-size: clamp(52px, 6vw, 96px); color: var(--ink); }
 .composer-dark .field { background: var(--ink); border-color: var(--ink); color: var(--white); }
 .composer-dark .field::placeholder { color: #9b968c; }
@@ -163,9 +165,14 @@ section { padding: 112px 40px 96px; max-width: 1680px; margin: 0 auto; }
   .reel-grid { padding: 8px 16px 16px; scroll-padding: 0 16px; }
   .reel-item { --h: min(440px, 58svh); }
   .reel .sec-head { padding: 0 16px 20px; }
-  .crew-list { grid-template-columns: 1fr; }
-  .crew-list .trim { min-height: 0; }
-  .mrow { grid-template-columns: minmax(0, 2fr) repeat(7, minmax(0, 1fr)); gap: 6px; }
+  /* The crew runs as a strip you swipe, like frames on the bench. */
+  .crew-list { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: 80%; overflow-x: auto; scroll-snap-type: x mandatory; overscroll-behavior-x: contain; padding-bottom: 4px; }
+  .crew-list li { scroll-snap-align: start; }
+  .crew-list .trim { min-height: 100%; }
+  /* Film name on its own line, seven measurements under it. */
+  .mrow { grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px 6px; }
+  .mrow .film { grid-column: 1 / -1; }
+  .mrow.head > span:first-child { display: none; }
   .mrow.head .full { display: none; }
   .mrow.head .short { display: inline; }
   .measure-sheet { padding: 4px 12px 16px; }
