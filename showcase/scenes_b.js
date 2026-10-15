@@ -17,12 +17,18 @@ function drawHeat(t) {
   if (t < tHands) {
     drawPlate(ctx, 'thermal_runner', t - t0, 0, 0, W, H, { zoom: 1.02 });
   } else {
-    // Three 9:16 slivers, three moments of the same plate (Turner format play).
-    const gap = 24 * U, sw = (W - 4 * gap) / 3;
+    // Three slivers, three moments of the same plate (Turner format play): 9:16 columns in the
+    // landscape cut, 16:9 bands in the vertical cut.
+    const gap = 24 * U;
     for (let i = 0; i < 3; i++) {
       const p = uiS(t - tHands + 0.12 - i * 0.1, 200);
-      const x = gap + i * (sw + gap), y = H * (1 - p);
-      drawPlate(ctx, 'thermal_hands', t - tHands + i * 1.2, x, y, sw, H, { zoom: 1.0, ax: 0.5 });
+      if (V) {
+        const bh = (H - 4 * gap) / 3, y = gap + i * (bh + gap), x = W * (1 - p) * (i % 2 ? -1 : 1);
+        drawPlate(ctx, 'thermal_hands', t - tHands + i * 1.2, x, y, W, bh, { zoom: 1.0 });
+      } else {
+        const sw = (W - 4 * gap) / 3, x = gap + i * (sw + gap), y = H * (1 - p);
+        drawPlate(ctx, 'thermal_hands', t - tHands + i * 1.2, x, y, sw, H, { zoom: 1.0, ax: 0.5 });
+      }
     }
   }
   scanlinePass(ctx, W, H, 0.22, Math.max(2, Math.round(3 * U)));
@@ -160,14 +166,14 @@ function drawDesk(t) {
     if (p <= 0.001) return;
     const po = document.createElement('canvas'); po.width = 320; po.height = 180;
     drawPlate(po.getContext('2d'), id, 0, 0, 0, 320, 180);
-    const ang = -1.1 + i * 0.62, rad = (V ? 520 : 640) * U;
-    const cx = CX + Math.cos(ang) * rad, cy = CY - 40 * U + Math.sin(ang) * rad * 0.62;
+    const ang = V ? [-1.35, -0.55, 0.25, 0.95, 2.6][i] : -1.1 + i * 0.62, rad = (V ? 430 : 640) * U;
+    const cx = CX + Math.cos(ang) * rad * (V ? 0.9 : 1), cy = CY - 40 * U + Math.sin(ang) * rad * (V ? 1.3 : 0.62);
     const w = 340 * U;
     drawPolaroid(po, cx - w / 2 + (1 - p) * 400 * U * Math.cos(ang), cy - w * 0.4 - (1 - p) * 300 * U, w, (hash(i, 0, 51) - 0.5) * 0.5, 1);
   });
   // Lockup stamped on the paper.
   if (t >= at('desk', 8)) {
-    const p = uiS(t - at('desk', 8), 300), size = (V ? 180 : 220) * U, ly = H * (V ? 0.78 : 0.84);
+    const p = uiS(t - at('desk', 8), 300), size = (V ? 180 : 220) * U, ly = H * (V ? 0.9 : 0.84);
     ctx.save(); ctx.translate(CX, ly); ctx.scale(lerp(1.25, 1, p), lerp(1.25, 1, p)); ctx.globalAlpha = p;
     font(800, size); ctx.fillStyle = C.ink; ctx.textAlign = 'center';
     ctx.fillText('MATTER', 0, 0);

@@ -172,9 +172,10 @@ function drawFire(t) {
   if (t >= at('fire', 8) && t < at('fire', 15)) {
     const v = lerp(1, 240, ramp(t, at('fire', 8), at('fire', 14)));
     font(800, 260 * U); ctx.fillStyle = C.amber;
-    odometer(v, 4, W - (V ? 560 : 640) * U, H * 0.56, 260 * U, C.amber);
+    const ox = V ? CX - 300 * U : W - 640 * U, oy = V ? H * 0.82 : H * 0.56;
+    odometer(v, 4, ox, oy, 260 * U, C.amber);
     font(500, 24 * U, F.ui); ctx.fillStyle = C.amber; ctx.textAlign = 'left';
-    ctx.fillText('FRAMES LIT BY FIRE', W - (V ? 560 : 640) * U, H * 0.56 + 48 * U);
+    ctx.fillText('FRAMES LIT BY FIRE', ox, oy + 48 * U);
   }
   if (t >= at('fire', 12)) chapterLabel('03', 'Fire', 100 * U, 320 * U, 240 * U, C.amber, typeS(t - at('fire', 12)));
   if (t >= at('fire', 8) && t < at('fire', 15)) aberrationPass(ctx, W, H, 3 * U);
